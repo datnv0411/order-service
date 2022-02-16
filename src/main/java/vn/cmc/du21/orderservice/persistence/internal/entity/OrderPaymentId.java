@@ -1,4 +1,4 @@
-package vn.cmc.du21.orderservice.internal.entity;
+package vn.cmc.du21.orderservice.persistence.internal.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;

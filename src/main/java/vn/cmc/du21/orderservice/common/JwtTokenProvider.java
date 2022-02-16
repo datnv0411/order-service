@@ -1,11 +1,8 @@
 package vn.cmc.du21.orderservice.common;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.client.RestTemplate;
-import vn.cmc.du21.inventoryservice.presentation.internal.response.UserResponse;
+import vn.cmc.du21.orderservice.presentation.internal.response.UserResponse;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.Instant;
@@ -24,40 +21,6 @@ public class JwtTokenProvider {
     //Thời gian có hiệu lực của chuỗi jwt
     private static final long JWT_AMOUNT_TO_ADD_TIME = 1;
     private static final ChronoUnit JWT_TIME_UNIT = ChronoUnit.DAYS;
-
-    // Tạo ra jwt từ thông tin user
-    public static String generateToken(long sessionId) {
-        log.info("chay den gen Token r nhé");
-        Instant now = Instant.now();
-        Date expiryDate = Date.from(now.plus(JWT_AMOUNT_TO_ADD_TIME, JWT_TIME_UNIT));
-        // Tạo chuỗi json web token từ id của user.
-        return Jwts.builder()
-                .setSubject(String.valueOf(sessionId))
-                .setIssuedAt(expiryDate)
-                .setExpiration(expiryDate)
-                .signWith(SignatureAlgorithm.HS256, JWT_SECRET)
-                .compact();
-    }
-
-    // Lấy thông tin session từ jwt
-    public static long getSessionIdFromJWT(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(JWT_SECRET)
-                .parseClaimsJws(token)
-                .getBody();
-
-        return Long.parseLong(claims.getSubject());
-    }
-
-    // Lấy thông tin session từ jwt
-    public static Date getExpireTimeFromJWT(String token) {
-        Claims claims = Jwts.parser()
-                .setSigningKey(JWT_SECRET)
-                .parseClaimsJws(token)
-                .getBody();
-
-        return claims.getExpiration();
-    }
 
     public static UserResponse getInfoUserFromToken(HttpServletRequest request)
     {

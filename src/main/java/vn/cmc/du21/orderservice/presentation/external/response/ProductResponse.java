@@ -98,7 +98,7 @@ public class ProductResponse {
 
     public String getProductImage() {
 
-        return PathImageUtil.getPathImage(this.productImage);
+        return this.productImage;
     }
 
     public void setProductImage(String productImage) {
