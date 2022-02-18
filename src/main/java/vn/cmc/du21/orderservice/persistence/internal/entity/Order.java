@@ -15,9 +15,10 @@ public class Order {
     private long userId;
     private long addressId;
     private String statusOrder;
-    private Timestamp createTime;
-    private Timestamp deliveryTime;
     private String note;
+    private Timestamp createTime;
+    private Timestamp holdTime;
+    private Timestamp deliveryTime;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderProduct> orderProducts;
@@ -32,14 +33,15 @@ public class Order {
     public Order() {
     }
 
-    public Order(long orderId, long userId, long addressId, String statusOrder, Timestamp createTime, Timestamp deliveryTime, String note, List<OrderProduct> orderProducts, List<OrderPayment> orderPayments, List<Voucher> vouchers) {
+    public Order(long orderId, long userId, long addressId, String statusOrder, String note, Timestamp createTime, Timestamp holdTime, Timestamp deliveryTime, List<OrderProduct> orderProducts, List<OrderPayment> orderPayments, List<Voucher> vouchers) {
         this.orderId = orderId;
         this.userId = userId;
         this.addressId = addressId;
         this.statusOrder = statusOrder;
-        this.createTime = createTime;
-        this.deliveryTime = deliveryTime;
         this.note = note;
+        this.createTime = createTime;
+        this.holdTime = holdTime;
+        this.deliveryTime = deliveryTime;
         this.orderProducts = orderProducts;
         this.orderPayments = orderPayments;
         this.vouchers = vouchers;
@@ -77,6 +79,14 @@ public class Order {
         this.statusOrder = statusOrder;
     }
 
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
     public Timestamp getCreateTime() {
         return createTime;
     }
@@ -85,20 +95,20 @@ public class Order {
         this.createTime = createTime;
     }
 
+    public Timestamp getHoldTime() {
+        return holdTime;
+    }
+
+    public void setHoldTime(Timestamp holdTime) {
+        this.holdTime = holdTime;
+    }
+
     public Timestamp getDeliveryTime() {
         return deliveryTime;
     }
 
     public void setDeliveryTime(Timestamp deliveryTime) {
         this.deliveryTime = deliveryTime;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
     }
 
     public List<OrderProduct> getOrderProducts() {
