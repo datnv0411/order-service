@@ -5,9 +5,7 @@ import org.springframework.web.client.RestTemplate;
 import vn.cmc.du21.orderservice.presentation.internal.response.UserResponse;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 
 @Slf4j
 public class JwtTokenProvider {

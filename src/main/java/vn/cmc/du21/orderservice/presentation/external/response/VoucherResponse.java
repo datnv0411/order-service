@@ -1,19 +1,10 @@
-package vn.cmc.du21.orderservice.persistence.internal.entity;
+package vn.cmc.du21.orderservice.presentation.external.response;
 
-import javax.persistence.*;
-import java.sql.Timestamp;
-import java.util.List;
-
-@Entity
-@Table(name = "voucher")
-public class Voucher {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+public class VoucherResponse {
     private long voucherId;
-
     private String codeVoucher;
-    private Timestamp startTime;
-    private Timestamp endTime;
+    private String startTime;
+    private String emdTime;
     private int timesOfUse;
     private int quantity;
     private String image;
@@ -22,18 +13,14 @@ public class Voucher {
     private int upToValue;
     private int applicableValue;
 
-
-    @ManyToMany(mappedBy = "vouchers")
-    private List<Order> orders;
-
-    public Voucher() {
+    public VoucherResponse() {
     }
 
-    public Voucher(long voucherId, String codeVoucher, Timestamp startTime, Timestamp emdTime, int timesOfUse, int quantity, String image, String title, int percentValue, int upToValue, int applicableValue, List<Order> orders) {
+    public VoucherResponse(long voucherId, String codeVoucher, String startTime, String emdTime, int timesOfUse, int quantity, String image, String title, int percentValue, int upToValue, int applicableValue) {
         this.voucherId = voucherId;
         this.codeVoucher = codeVoucher;
         this.startTime = startTime;
-        this.endTime = emdTime;
+        this.emdTime = emdTime;
         this.timesOfUse = timesOfUse;
         this.quantity = quantity;
         this.image = image;
@@ -41,7 +28,6 @@ public class Voucher {
         this.percentValue = percentValue;
         this.upToValue = upToValue;
         this.applicableValue = applicableValue;
-        this.orders = orders;
     }
 
     public long getVoucherId() {
@@ -60,20 +46,20 @@ public class Voucher {
         this.codeVoucher = codeVoucher;
     }
 
-    public Timestamp getStartTime() {
+    public String getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Timestamp startTime) {
+    public void setStartTime(String startTime) {
         this.startTime = startTime;
     }
 
-    public Timestamp getEndTime() {
-        return endTime;
+    public String getEmdTime() {
+        return emdTime;
     }
 
-    public void setEndTime(Timestamp endTime) {
-        this.endTime = endTime;
+    public void setEmdTime(String emdTime) {
+        this.emdTime = emdTime;
     }
 
     public int getTimesOfUse() {
@@ -130,13 +116,5 @@ public class Voucher {
 
     public void setApplicableValue(int applicableValue) {
         this.applicableValue = applicableValue;
-    }
-
-    public List<Order> getOrders() {
-        return orders;
-    }
-
-    public void setOrders(List<Order> orders) {
-        this.orders = orders;
     }
 }
