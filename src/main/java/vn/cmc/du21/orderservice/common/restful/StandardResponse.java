@@ -20,6 +20,10 @@ public class StandardResponse<T> {
         this.message = message;
     }
 
+    public StandardResponse() {
+
+    }
+
     public StatusResponse getStatus() {
         return status;
     }

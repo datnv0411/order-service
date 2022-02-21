@@ -1,6 +1,4 @@
-package vn.cmc.du21.orderservice.presentation.external.response;
-
-import vn.cmc.du21.orderservice.common.PathImageUtil;
+package vn.cmc.du21.orderservice.presentation.internal.response;
 
 import java.util.List;
 
