@@ -1,4 +1,4 @@
-package vn.cmc.du21.orderservice.presentation.external.response;
+package vn.cmc.du21.orderservice.presentation.internal.response;
 
 public class SizeResponse {
     private long sizeId;
