@@ -1,13 +1,12 @@
-package vn.cmc.du21.orderservice.presentation.external.response;
+package vn.cmc.du21.orderservice.presentation.external.request;
 
-import vn.cmc.du21.orderservice.presentation.internal.response.AddressResponse;
+import vn.cmc.du21.orderservice.presentation.external.response.TotalOrderResponse;
+import vn.cmc.du21.orderservice.presentation.internal.request.AddressRequest;
 
 import java.sql.Timestamp;
 import java.util.List;
 
-public class OrderResponse {
-    // order
-    private long orderId;
+public class OrderRequest {
     private long userId;
     private long addressId;
     private String statusOrder;
@@ -15,27 +14,25 @@ public class OrderResponse {
     private Timestamp createTime;
     private Timestamp holdTime;
     private Timestamp deliveryTime;
-
     // voucher response
-    private List<VoucherResponse> voucherResponses;
+    private List<VoucherRequest> voucherRequests;
 
     // product response
-    private List<OrderProductResponse> productResponses;
+    private List<OrderProductRequest> productRequests;
 
     // payment response
-    private OrderPaymentResponse paymentResponse;
+    private OrderPaymentRequest paymentResponse;
 
     // address response
-    private AddressResponse addressResponse;
+    private AddressRequest addressResponse;
 
     // total response
     private TotalOrderResponse totalResponse;
 
-    public OrderResponse() {
+    public OrderRequest() {
     }
 
-    public OrderResponse(long orderId, long userId, long addressId, String statusOrder, String note, Timestamp createTime, Timestamp holdTime, Timestamp deliveryTime, List<VoucherResponse> voucherResponses, List<OrderProductResponse> productResponses, OrderPaymentResponse paymentResponse, AddressResponse addressResponse, TotalOrderResponse totalResponse) {
-        this.orderId = orderId;
+    public OrderRequest(long userId, long addressId, String statusOrder, String note, Timestamp createTime, Timestamp holdTime, Timestamp deliveryTime, List<VoucherRequest> voucherRequests, List<OrderProductRequest> productRequests, OrderPaymentRequest paymentResponse, AddressRequest addressResponse, TotalOrderResponse totalResponse) {
         this.userId = userId;
         this.addressId = addressId;
         this.statusOrder = statusOrder;
@@ -43,19 +40,11 @@ public class OrderResponse {
         this.createTime = createTime;
         this.holdTime = holdTime;
         this.deliveryTime = deliveryTime;
-        this.voucherResponses = voucherResponses;
-        this.productResponses = productResponses;
+        this.voucherRequests = voucherRequests;
+        this.productRequests = productRequests;
         this.paymentResponse = paymentResponse;
         this.addressResponse = addressResponse;
         this.totalResponse = totalResponse;
-    }
-
-    public long getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(long orderId) {
-        this.orderId = orderId;
     }
 
     public long getUserId() {
@@ -114,35 +103,35 @@ public class OrderResponse {
         this.deliveryTime = deliveryTime;
     }
 
-    public List<VoucherResponse> getVoucherResponses() {
-        return voucherResponses;
+    public List<VoucherRequest> getVoucherRequests() {
+        return voucherRequests;
     }
 
-    public void setVoucherResponses(List<VoucherResponse> voucherResponses) {
-        this.voucherResponses = voucherResponses;
+    public void setVoucherRequests(List<VoucherRequest> voucherRequests) {
+        this.voucherRequests = voucherRequests;
     }
 
-    public List<OrderProductResponse> getProductResponses() {
-        return productResponses;
+    public List<OrderProductRequest> getProductRequests() {
+        return productRequests;
     }
 
-    public void setProductResponses(List<OrderProductResponse> productResponses) {
-        this.productResponses = productResponses;
+    public void setProductRequests(List<OrderProductRequest> productRequests) {
+        this.productRequests = productRequests;
     }
 
-    public OrderPaymentResponse getPaymentResponse() {
+    public OrderPaymentRequest getPaymentResponse() {
         return paymentResponse;
     }
 
-    public void setPaymentResponse(OrderPaymentResponse paymentResponse) {
+    public void setPaymentResponse(OrderPaymentRequest paymentResponse) {
         this.paymentResponse = paymentResponse;
     }
 
-    public AddressResponse getAddressResponse() {
+    public AddressRequest getAddressResponse() {
         return addressResponse;
     }
 
-    public void setAddressResponse(AddressResponse addressResponse) {
+    public void setAddressResponse(AddressRequest addressResponse) {
         this.addressResponse = addressResponse;
     }
 

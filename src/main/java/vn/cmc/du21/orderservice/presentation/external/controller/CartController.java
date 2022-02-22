@@ -1,5 +1,6 @@
 package vn.cmc.du21.orderservice.presentation.external.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.env.Environment;
@@ -23,6 +24,7 @@ import vn.cmc.du21.orderservice.service.VoucherService;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequestMapping(path = "api/v1.0")
 public class CartController {
@@ -36,6 +38,7 @@ public class CartController {
     @GetMapping(path = "/cart/my-cart")
     ResponseEntity<Object> cartDetail()
     {
+        log.info("Mapped cartDetail method {{GET: /cart/my-cart}}");
         long userId = 1L;
 
         CartResponse cartResponse = new CartResponse();
@@ -75,6 +78,7 @@ public class CartController {
     @PutMapping("/cart/update")
     ResponseEntity<Object> updateCart(@RequestBody CartRequest cartRequest)
     {
+        log.info("Mapped updateCart method {{GET: /cart/update}}");
         long userId = 1L;
         // update cart - save database
         cartService.updateProductOnCart(
