@@ -26,10 +26,18 @@ public class CartProductResponse {
     public CartProductResponse() {
     }
 
+
     public CartProductResponse(ProductResponse productResponse, long sizeId, int quantity) {
         this.productResponse = productResponse;
         this.sizeId = sizeId;
         this.quantity = quantity;
+    }
+
+    public CartProductResponse(ProductResponse productResponse, long sizeId, int quantity, long totalPrice) {
+        this.productResponse = productResponse;
+        this.sizeId = sizeId;
+        this.quantity = quantity;
+        this.totalPrice = totalPrice;
     }
 
     public ProductResponse getProductResponse() {
@@ -38,22 +46,6 @@ public class CartProductResponse {
 
     public void setProductResponse(ProductResponse productResponse) {
         this.productResponse = productResponse;
-    }
-
-    public long getSizeId() {
-        return sizeId;
-    }
-
-    public void setSizeId(long sizeId) {
-        this.sizeId = sizeId;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
     }
 
     public long getTotalPrice() {
@@ -70,5 +62,22 @@ public class CartProductResponse {
 
     public void setTotalPrice(long totalPrice) {
         this.totalPrice = totalPrice;
+
+    }
+
+    public long getSizeId() {
+        return sizeId;
+    }
+
+    public void setSizeId(long sizeId) {
+        this.sizeId = sizeId;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 }

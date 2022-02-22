@@ -44,4 +44,47 @@ public class CartService {
             cartRepository.save(foundCart.get());
         }
     }
+
+    @Transactional
+    public void createCart(long userId){
+        Cart newCart = new Cart();
+        newCart.setUserId(userId);
+        newCart.setCartId(0);
+        cartRepository.save(newCart);
+    }
+
+    @Transactional
+    public Cart findCart (long userId){
+        return cartRepository.findByUserId(userId).orElse(null);
+    }
+
+    @Transactional
+    public void addProduct (CartProduct cartProduct){
+        if(cartProductRepository.findCartProductByCartProductId(cartProduct.getCartProductId()) == null){
+            cartProductRepository.save(cartProduct);
+        }else {
+            cartProduct.setQuantity(cartProduct.getQuantity() +
+                    cartProductRepository.findCartProductByCartProductId(cartProduct.getCartProductId()).getQuantity());
+            cartProductRepository.save(cartProduct);
+        }
+
+    }
+    @Transactional
+    public void removeProduct(CartProductId cartProductId) throws Throwable {
+        CartProduct checkfound = cartProductRepository.findByCartProductId(cartProductId).orElseThrow(
+                () -> {
+                    throw new RuntimeException("product does not exist !!!");
+                }
+        );
+        cartProductRepository.delete(checkfound);
+    }
+    @Transactional
+    public void removeAll(long cartId){
+        cartProductRepository.deleteAllByCartProductId_CartId(cartId);
+    }
+    @Transactional
+    public List<CartProduct> findAllByCartId (long cartId){
+        List<CartProduct> list = cartProductRepository.findAllByCartProductId_CartId(cartId);
+        return  list;
+    }
 }
