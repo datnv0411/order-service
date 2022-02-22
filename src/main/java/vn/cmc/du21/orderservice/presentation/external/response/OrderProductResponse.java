@@ -1,6 +1,5 @@
 package vn.cmc.du21.orderservice.presentation.external.response;
 
-import vn.cmc.du21.orderservice.persistence.internal.entity.OrderProductId;
 import vn.cmc.du21.orderservice.presentation.internal.response.ProductResponse;
 
 public class OrderProductResponse {

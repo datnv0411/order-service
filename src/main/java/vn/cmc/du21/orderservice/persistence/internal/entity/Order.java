@@ -13,7 +13,6 @@ public class Order {
     private long orderId;
 
     private long userId;
-    private long addressId;
     private String statusOrder;
     private String note;
     private Timestamp createTime;
@@ -30,13 +29,16 @@ public class Order {
     @JoinTable(name = "ordervoucher", joinColumns = @JoinColumn(name = "orderId"), inverseJoinColumns = @JoinColumn(name = "voucherId"))
     private List<Voucher> vouchers;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "deliveryAddressId")
+    private DeliveryAddress deliveryAddress;
+
     public Order() {
     }
 
-    public Order(long orderId, long userId, long addressId, String statusOrder, String note, Timestamp createTime, Timestamp holdTime, Timestamp deliveryTime, List<OrderProduct> orderProducts, List<OrderPayment> orderPayments, List<Voucher> vouchers) {
+    public Order(long orderId, long userId, String statusOrder, String note, Timestamp createTime, Timestamp holdTime, Timestamp deliveryTime, List<OrderProduct> orderProducts, List<OrderPayment> orderPayments, List<Voucher> vouchers, DeliveryAddress deliveryAddress) {
         this.orderId = orderId;
         this.userId = userId;
-        this.addressId = addressId;
         this.statusOrder = statusOrder;
         this.note = note;
         this.createTime = createTime;
@@ -45,6 +47,7 @@ public class Order {
         this.orderProducts = orderProducts;
         this.orderPayments = orderPayments;
         this.vouchers = vouchers;
+        this.deliveryAddress = deliveryAddress;
     }
 
     public long getOrderId() {
@@ -61,14 +64,6 @@ public class Order {
 
     public void setUserId(long userId) {
         this.userId = userId;
-    }
-
-    public long getAddressId() {
-        return addressId;
-    }
-
-    public void setAddressId(long addressId) {
-        this.addressId = addressId;
     }
 
     public String getStatusOrder() {
@@ -133,5 +128,13 @@ public class Order {
 
     public void setVouchers(List<Voucher> vouchers) {
         this.vouchers = vouchers;
+    }
+
+    public DeliveryAddress getDeliveryAddress() {
+        return deliveryAddress;
+    }
+
+    public void setDeliveryAddress(DeliveryAddress deliveryAddress) {
+        this.deliveryAddress = deliveryAddress;
     }
 }

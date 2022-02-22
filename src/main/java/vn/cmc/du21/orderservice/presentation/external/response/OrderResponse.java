@@ -1,13 +1,5 @@
 package vn.cmc.du21.orderservice.presentation.external.response;
 
-import vn.cmc.du21.orderservice.persistence.internal.entity.Order;
-import vn.cmc.du21.orderservice.persistence.internal.entity.OrderPayment;
-import vn.cmc.du21.orderservice.persistence.internal.entity.Voucher;
-import vn.cmc.du21.orderservice.presentation.internal.response.AddressResponse;
-import vn.cmc.du21.orderservice.presentation.internal.response.PaymentResponse;
-import vn.cmc.du21.orderservice.presentation.internal.response.ProductResponse;
-import vn.cmc.du21.orderservice.presentation.internal.response.UserResponse;
-
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -15,12 +7,11 @@ public class OrderResponse {
     // order
     private long orderId;
     private long userId;
-    private long addressId;
     private String statusOrder;
     private String note;
-    private Timestamp createTime;
-    private Timestamp holdTime;
-    private Timestamp deliveryTime;
+    private String createTime;
+    private String holdTime;
+    private String deliveryTime;
 
     // voucher response
     private List<VoucherResponse> voucherResponses;
@@ -32,18 +23,17 @@ public class OrderResponse {
     private OrderPaymentResponse paymentResponse;
 
     // address response
-    private AddressResponse addressResponse;
+    private DeliveryAddressResponse addressResponse;
 
     // total response
-    private TotalResponse totalResponse;
+    private TotalOrderResponse totalResponse;
 
     public OrderResponse() {
     }
 
-    public OrderResponse(long orderId, long userId, long addressId, String statusOrder, String note, Timestamp createTime, Timestamp holdTime, Timestamp deliveryTime, List<VoucherResponse> voucherResponses, List<OrderProductResponse> productResponses, OrderPaymentResponse paymentResponse, AddressResponse addressResponse, TotalResponse totalResponse) {
+    public OrderResponse(long orderId, long userId, String statusOrder, String note, String createTime, String holdTime, String deliveryTime, List<VoucherResponse> voucherResponses, List<OrderProductResponse> productResponses, OrderPaymentResponse paymentResponse, DeliveryAddressResponse addressResponse, TotalOrderResponse totalResponse) {
         this.orderId = orderId;
         this.userId = userId;
-        this.addressId = addressId;
         this.statusOrder = statusOrder;
         this.note = note;
         this.createTime = createTime;
@@ -72,14 +62,6 @@ public class OrderResponse {
         this.userId = userId;
     }
 
-    public long getAddressId() {
-        return addressId;
-    }
-
-    public void setAddressId(long addressId) {
-        this.addressId = addressId;
-    }
-
     public String getStatusOrder() {
         return statusOrder;
     }
@@ -96,27 +78,27 @@ public class OrderResponse {
         this.note = note;
     }
 
-    public Timestamp getCreateTime() {
+    public String getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Timestamp createTime) {
+    public void setCreateTime(String createTime) {
         this.createTime = createTime;
     }
 
-    public Timestamp getHoldTime() {
+    public String getHoldTime() {
         return holdTime;
     }
 
-    public void setHoldTime(Timestamp holdTime) {
+    public void setHoldTime(String holdTime) {
         this.holdTime = holdTime;
     }
 
-    public Timestamp getDeliveryTime() {
+    public String getDeliveryTime() {
         return deliveryTime;
     }
 
-    public void setDeliveryTime(Timestamp deliveryTime) {
+    public void setDeliveryTime(String deliveryTime) {
         this.deliveryTime = deliveryTime;
     }
 
@@ -144,19 +126,19 @@ public class OrderResponse {
         this.paymentResponse = paymentResponse;
     }
 
-    public AddressResponse getAddressResponse() {
+    public DeliveryAddressResponse getAddressResponse() {
         return addressResponse;
     }
 
-    public void setAddressResponse(AddressResponse addressResponse) {
+    public void setAddressResponse(DeliveryAddressResponse addressResponse) {
         this.addressResponse = addressResponse;
     }
 
-    public TotalResponse getTotalResponse() {
+    public TotalOrderResponse getTotalResponse() {
         return totalResponse;
     }
 
-    public void setTotalResponse(TotalResponse totalResponse) {
+    public void setTotalResponse(TotalOrderResponse totalResponse) {
         this.totalResponse = totalResponse;
     }
 }

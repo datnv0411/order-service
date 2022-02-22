@@ -1,7 +1,5 @@
 package vn.cmc.du21.orderservice.presentation.external.response;
 
-import java.sql.Timestamp;
-
 public class VoucherResponse {
     private long voucherId;
     private String codeVoucher;
@@ -18,9 +16,7 @@ public class VoucherResponse {
     public VoucherResponse() {
     }
 
-    public VoucherResponse(long voucherId, String codeVoucher, String startTime, String emdTime
-            , int timesOfUse, int quantity, String image, String title
-            , int percentValue, int upToValue, int applicableValue) {
+    public VoucherResponse(long voucherId, String codeVoucher, String startTime, String emdTime, int timesOfUse, int quantity, String image, String title, int percentValue, int upToValue, int applicableValue) {
         this.voucherId = voucherId;
         this.codeVoucher = codeVoucher;
         this.startTime = startTime;

@@ -3,20 +3,22 @@ package vn.cmc.du21.orderservice.presentation.external.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.env.Environment;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import vn.cmc.du21.orderservice.common.JwtTokenProvider;
 import vn.cmc.du21.orderservice.common.restful.StandardResponse;
 import vn.cmc.du21.orderservice.common.restful.StatusResponse;
+import vn.cmc.du21.orderservice.presentation.external.mapper.DeliveryAddressMapper;
 import vn.cmc.du21.orderservice.presentation.external.mapper.OrderMapper;
 import vn.cmc.du21.orderservice.presentation.external.mapper.OrderPaymentMapper;
 import vn.cmc.du21.orderservice.presentation.external.mapper.OrderProductMapper;
 import vn.cmc.du21.orderservice.presentation.external.response.OrderPaymentResponse;
 import vn.cmc.du21.orderservice.presentation.external.response.OrderProductResponse;
 import vn.cmc.du21.orderservice.presentation.external.response.OrderResponse;
-import vn.cmc.du21.orderservice.presentation.external.response.TotalResponse;
-import vn.cmc.du21.orderservice.presentation.internal.response.AddressResponse;
+import vn.cmc.du21.orderservice.presentation.external.response.TotalOrderResponse;
+import vn.cmc.du21.orderservice.presentation.external.response.DeliveryAddressResponse;
 import vn.cmc.du21.orderservice.presentation.internal.response.ProductResponse;
 import vn.cmc.du21.orderservice.presentation.internal.response.UserResponse;
 import vn.cmc.du21.orderservice.service.OrderService;
@@ -32,32 +34,34 @@ import java.util.stream.Collectors;
 @RequestMapping(path = "/api/v1.0")
 public class OrderController {
     @Autowired
+    private Environment env;
+    @Autowired
     OrderService orderService;
 
     // get detail address
-    public static AddressResponse getDetailAddress(long addressId,
-                                                   HttpServletRequest request, HttpServletResponse response){
+    /*public DeliveryAddressResponse getDetailAddress(long addressId,
+                                                    HttpServletRequest request, HttpServletResponse response){
 
         HttpHeaders httpHeaders = new HttpHeaders();
         RestTemplate restTemplate = new RestTemplate();
         httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         httpHeaders.setBearerAuth(request.getHeader("Authorization").split(" ")[1]);
-        String uri = "http://192.168.66.125:8100/api/v1.0/address/" + addressId + "";
+        String uri = env.getProperty("path.user-service")+"/api/v1.0/address/" + addressId + "";
 
-        HttpEntity<StandardResponse<AddressResponse>> entity = new HttpEntity<>(new StandardResponse<AddressResponse>(), httpHeaders);
-        ResponseEntity<StandardResponse<AddressResponse>> res = restTemplate
-                .exchange(uri, HttpMethod.GET, entity, new ParameterizedTypeReference<StandardResponse<AddressResponse>>() {});
+        HttpEntity<StandardResponse<DeliveryAddressResponse>> entity = new HttpEntity<>(new StandardResponse<DeliveryAddressResponse>(), httpHeaders);
+        ResponseEntity<StandardResponse<DeliveryAddressResponse>> res = restTemplate
+                .exchange(uri, HttpMethod.GET, entity, new ParameterizedTypeReference<StandardResponse<DeliveryAddressResponse>>() {});
 
-        AddressResponse addressResponse = res.getBody().getData();
+        DeliveryAddressResponse addressResponse = res.getBody().getData();
 
         return addressResponse;
-    }
+    }*/
 
     // get detail product
-    public static List<OrderProductResponse> getDetailProduct(List<OrderProductResponse> orderProductResponses){
+    public List<OrderProductResponse> getDetailProduct(List<OrderProductResponse> orderProductResponses){
 
         for (OrderProductResponse item : orderProductResponses){
-            String uri = "http://192.168.66.125:8200/api/v1.0/product/get-detail-product/" +
+            String uri = env.getProperty("path.inventory-service") + "/api/v1.0/product/get-detail-product/" +
                     item.getProductResponse().getProductId();
 
             RestTemplate restTemplate = new RestTemplate();
@@ -96,7 +100,10 @@ public class OrderController {
         long userId = userLogin.getUserId();
 
         // get detail address
-        AddressResponse addressResponse = getDetailAddress(orderService.getOrderByOrderId(userId, orderId).getAddressId(), request, response);
+        DeliveryAddressResponse addressResponse = DeliveryAddressMapper.convertAddressRequestToAddress(
+                orderService.getDeliveryAddressByOrderId(
+                    orderService.getOrderByOrderId(userId, orderId).getDeliveryAddress().getDeliveryAddressId()
+        ));
 
         // get list product
         List<OrderProductResponse> orderProductResponses = orderService.getProductByOrderId(userId, orderId)
@@ -108,7 +115,7 @@ public class OrderController {
         OrderPaymentResponse orderPaymentResponse = OrderPaymentMapper.convertToOrderPaymentResponse(orderService.getPaymentByOrderId(userId, orderId));
 
         // get total order
-        TotalResponse totalResponse = new TotalResponse();
+        TotalOrderResponse totalResponse = new TotalOrderResponse();
 
         totalResponse.setTotalPrice(orderService.totalPrice(orderId));
         totalResponse.setTotalDiscount(orderService.totalDiscount(orderId));
@@ -136,7 +143,7 @@ public class OrderController {
 
     // update status - cancel
     @PutMapping("/order/cancel/{orderId}")
-    ResponseEntity<Object>updateStatusOrder(@PathVariable(name = "orderId") long orderId,
+    ResponseEntity<Object> updateStatusOrder(@PathVariable(name = "orderId") long orderId,
                                           HttpServletRequest request, HttpServletResponse response) throws Throwable{
 
         log.info("Mapped createOrder method {{PUT: /order/{orderId}}}");
@@ -156,7 +163,10 @@ public class OrderController {
         long userId = userLogin.getUserId();
 
         // get detail address
-        AddressResponse addressResponse = getDetailAddress(orderService.getOrderByOrderId(userId, orderId).getAddressId(), request, response);
+        DeliveryAddressResponse addressResponse = DeliveryAddressMapper.convertAddressRequestToAddress(
+                orderService.getDeliveryAddressByOrderId(
+                        orderService.getOrderByOrderId(userId, orderId).getDeliveryAddress().getDeliveryAddressId()
+                ));
 
         // get list product
         List<OrderProductResponse> orderProductResponses = orderService.getProductByOrderId(userId, orderId)
@@ -168,7 +178,7 @@ public class OrderController {
         OrderPaymentResponse orderPaymentResponse = OrderPaymentMapper.convertToOrderPaymentResponse(orderService.getPaymentByOrderId(userId, orderId));
 
         // get total order
-        TotalResponse totalResponse = new TotalResponse();
+        TotalOrderResponse totalResponse = new TotalOrderResponse();
 
         totalResponse.setTotalPrice(orderService.totalPrice(orderId));
         totalResponse.setTotalDiscount(orderService.totalDiscount(orderId));
@@ -215,7 +225,9 @@ public class OrderController {
 
         long userId = userLogin.getUserId();
 
+        // get detail address by addressId - user-service,
 
+        //get order-service truyền
 
         return ResponseEntity.status(HttpStatus.OK).body(
                 new StandardResponse<>(

@@ -1,11 +1,7 @@
 package vn.cmc.du21.orderservice.presentation.external.request;
 
-import vn.cmc.du21.orderservice.persistence.internal.entity.OrderPayment;
-import vn.cmc.du21.orderservice.presentation.external.response.OrderProductResponse;
-import vn.cmc.du21.orderservice.presentation.external.response.TotalResponse;
-import vn.cmc.du21.orderservice.presentation.external.response.VoucherResponse;
+import vn.cmc.du21.orderservice.presentation.external.response.TotalOrderResponse;
 import vn.cmc.du21.orderservice.presentation.internal.request.AddressRequest;
-import vn.cmc.du21.orderservice.presentation.internal.response.AddressResponse;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -13,30 +9,24 @@ import java.util.List;
 public class OrderRequest {
     private long userId;
     private long addressId;
+    private long paymentId;
     private String statusOrder;
     private String note;
     private Timestamp createTime;
     private Timestamp holdTime;
     private Timestamp deliveryTime;
+
     // voucher response
     private List<VoucherRequest> voucherRequests;
 
     // product response
     private List<OrderProductRequest> productRequests;
 
-    // payment response
-    private OrderPaymentRequest paymentResponse;
-
-    // address response
-    private AddressRequest addressResponse;
-
-    // total response
-    private TotalResponse totalResponse;
 
     public OrderRequest() {
     }
 
-    public OrderRequest(long userId, long addressId, String statusOrder, String note, Timestamp createTime, Timestamp holdTime, Timestamp deliveryTime, List<VoucherRequest> voucherRequests, List<OrderProductRequest> productRequests, OrderPaymentRequest paymentResponse, AddressRequest addressResponse, TotalResponse totalResponse) {
+    public OrderRequest(long userId, long addressId, String statusOrder, String note, Timestamp createTime, Timestamp holdTime, Timestamp deliveryTime, List<VoucherRequest> voucherRequests, List<OrderProductRequest> productRequests) {
         this.userId = userId;
         this.addressId = addressId;
         this.statusOrder = statusOrder;
@@ -46,9 +36,6 @@ public class OrderRequest {
         this.deliveryTime = deliveryTime;
         this.voucherRequests = voucherRequests;
         this.productRequests = productRequests;
-        this.paymentResponse = paymentResponse;
-        this.addressResponse = addressResponse;
-        this.totalResponse = totalResponse;
     }
 
     public long getUserId() {
@@ -123,27 +110,19 @@ public class OrderRequest {
         this.productRequests = productRequests;
     }
 
-    public OrderPaymentRequest getPaymentResponse() {
-        return paymentResponse;
+    public OrderPaymentRequest getPaymentRequest() {
+        return paymentRequest;
     }
 
-    public void setPaymentResponse(OrderPaymentRequest paymentResponse) {
-        this.paymentResponse = paymentResponse;
+    public void setPaymentRequest(OrderPaymentRequest paymentRequest) {
+        this.paymentRequest = paymentRequest;
     }
 
-    public AddressRequest getAddressResponse() {
-        return addressResponse;
+    public AddressRequest getAddressRequest() {
+        return addressRequest;
     }
 
-    public void setAddressResponse(AddressRequest addressResponse) {
-        this.addressResponse = addressResponse;
-    }
-
-    public TotalResponse getTotalResponse() {
-        return totalResponse;
-    }
-
-    public void setTotalResponse(TotalResponse totalResponse) {
-        this.totalResponse = totalResponse;
+    public void setAddressRequest(AddressRequest addressRequest) {
+        this.addressRequest = addressRequest;
     }
 }

@@ -1,7 +1,13 @@
-package vn.cmc.du21.orderservice.presentation.internal.response;
+package vn.cmc.du21.orderservice.persistence.internal.entity;
 
-public class AddressResponse {
-    private long addressId;
+import javax.persistence.*;
+
+@Entity
+@Table(name = "deliveryaddress")
+public class DeliveryAddress {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long deliveryAddressId;
     private boolean isDefault;
     private String typeAddress;
     private String fullName;
@@ -11,12 +17,11 @@ public class AddressResponse {
     private String town;
     private String specificAddress;
 
-    public AddressResponse() {
+    public DeliveryAddress() {
     }
 
-    public AddressResponse(long addressId, boolean isDefault, String typeAddress, String fullName
-            , String cellphone, String province, String district, String town, String specificAddress) {
-        this.addressId = addressId;
+    public DeliveryAddress(long addressId, boolean isDefault, String typeAddress, String fullName, String cellphone, String province, String district, String town, String specificAddress) {
+        this.deliveryAddressId = addressId;
         this.isDefault = isDefault;
         this.typeAddress = typeAddress;
         this.fullName = fullName;
@@ -27,12 +32,12 @@ public class AddressResponse {
         this.specificAddress = specificAddress;
     }
 
-    public long getAddressId() {
-        return addressId;
+    public long getDeliveryAddressId() {
+        return deliveryAddressId;
     }
 
-    public void setAddressId(long addressId) {
-        this.addressId = addressId;
+    public void setDeliveryAddressId(long deliveryAddressId) {
+        this.deliveryAddressId = deliveryAddressId;
     }
 
     public boolean isDefault() {

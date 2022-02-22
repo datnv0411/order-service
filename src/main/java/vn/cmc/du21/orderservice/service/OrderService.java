@@ -2,18 +2,16 @@ package vn.cmc.du21.orderservice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import vn.cmc.du21.orderservice.persistence.internal.entity.Order;
-import vn.cmc.du21.orderservice.persistence.internal.entity.OrderPayment;
-import vn.cmc.du21.orderservice.persistence.internal.entity.OrderProduct;
-import vn.cmc.du21.orderservice.persistence.internal.entity.Voucher;
+import vn.cmc.du21.orderservice.persistence.internal.entity.*;
+import vn.cmc.du21.orderservice.persistence.internal.repository.DeliveryAddressRepository;
 import vn.cmc.du21.orderservice.persistence.internal.repository.OrderProductRepository;
 import vn.cmc.du21.orderservice.persistence.internal.repository.OrderRepository;
 import vn.cmc.du21.orderservice.persistence.internal.repository.VoucherRepository;
+import vn.cmc.du21.orderservice.presentation.external.response.DeliveryAddressResponse;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class OrderService {
@@ -26,6 +24,8 @@ public class OrderService {
     OrderPayment orderPayment;*/
     @Autowired
     VoucherRepository voucherRepository;
+    @Autowired
+    DeliveryAddressRepository deliveryAddressRepository;
 
     @Transactional
     public Order getOrderByOrderId(long userId, long orderId) {
@@ -119,11 +119,25 @@ public class OrderService {
     }
 
     @Transactional
-    public Order createOrder(Order order){
-        List<OrderProduct> orderProducts = new ArrayList<>();
-        for (OrderProduct item : orderProducts){
-            orderProducts = orderProductRepository.findByOrderProductId(item.getOrderProductId().getOrderId());
+    public Order createOrder(Order order, DeliveryAddress deliveryAddress){
+
+        // order
+
+        // list products + size + quantity
+
+        // orderaddress
+        order.setDeliveryAddress(deliveryAddress);
+        // ordervoucher
+        List<Voucher> vouchers = new ArrayList<>();
+        for (Voucher item : order.getVouchers()){
+            Voucher voucher = voucherRepository.findByCodeVoucher(item.getCodeVoucher()).orElse(null);
         }
-        order.setOrderProducts(orderProducts);
+        // orderpayment
+
+
+    }
+
+    public DeliveryAddress getDeliveryAddressByOrderId(long deliveryAddressId) {
+        return deliveryAddressRepository.findById(deliveryAddressId).orElse(null);
     }
 }
