@@ -2,6 +2,7 @@ package vn.cmc.du21.orderservice.presentation.external.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -10,14 +11,15 @@ import org.springframework.web.client.RestTemplate;
 import vn.cmc.du21.orderservice.common.restful.StandardResponse;
 import vn.cmc.du21.orderservice.common.restful.StatusResponse;
 import vn.cmc.du21.orderservice.presentation.external.mapper.CartProductMapper;
-import vn.cmc.du21.orderservice.presentation.external.request.CartProductRequest;
+import vn.cmc.du21.orderservice.presentation.external.mapper.VoucherMapper;
 import vn.cmc.du21.orderservice.presentation.external.request.CartRequest;
 import vn.cmc.du21.orderservice.presentation.external.response.CartProductResponse;
 import vn.cmc.du21.orderservice.presentation.external.response.CartResponse;
+import vn.cmc.du21.orderservice.presentation.external.response.VoucherResponse;
 import vn.cmc.du21.orderservice.presentation.internal.response.ProductResponse;
 import vn.cmc.du21.orderservice.service.CartService;
+import vn.cmc.du21.orderservice.service.VoucherService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,7 +27,11 @@ import java.util.stream.Collectors;
 @RequestMapping(path = "api/v1.0")
 public class CartController {
     @Autowired
+    private Environment env;
+    @Autowired
     CartService cartService;
+    @Autowired
+    VoucherService voucherService;
 
     @GetMapping(path = "/cart/my-cart")
     ResponseEntity<Object> cartDetail()
@@ -41,7 +47,7 @@ public class CartController {
                 .collect(Collectors.toList());
 
         for (CartProductResponse item : cartProductResponseList) {
-            final String uri = "http://192.168.66.125:8200/api/v1.0/product/get-detail-product/" +
+            final String uri = env.getProperty("path.inventory-service") + "/api/v1.0/product/get-detail-product/" +
                     item.getProductResponse().getProductId();
 
             RestTemplate restTemplate = new RestTemplate();
@@ -70,12 +76,16 @@ public class CartController {
     ResponseEntity<Object> updateCart(@RequestBody CartRequest cartRequest)
     {
         long userId = 1L;
-        // update cart
-
-
+        // update cart - save database
+        cartService.updateProductOnCart(
+                cartRequest.getProductRequests()
+                        .stream()
+                        .map(CartProductMapper::convertCartProductRequestToCartProduct)
+                        .collect(Collectors.toList()),
+                userId
+        );
 
         CartResponse cartResponse = new CartResponse();
-
         //get list product
         List<CartProductResponse> cartProductResponseList = cartService.getMyCart(userId).getCartProducts()
                 .stream()
@@ -83,7 +93,7 @@ public class CartController {
                 .collect(Collectors.toList());
 
         for (CartProductResponse item : cartProductResponseList) {
-            final String uri = "http://192.168.66.125:8200/api/v1.0/product/get-detail-product/" +
+            final String uri = env.getProperty("path.inventory-service") + "/api/v1.0/product/get-detail-product/" +
                     item.getProductResponse().getProductId();
 
             RestTemplate restTemplate = new RestTemplate();
@@ -98,6 +108,17 @@ public class CartController {
         }
 
         cartResponse.setItems(cartProductResponseList);
+
+        List<VoucherResponse> voucherResponseList = voucherService.applyVoucher(
+                cartRequest.getVoucherRequests()
+                        .stream()
+                        .map(VoucherMapper::convertVoucherRequestToVoucher)
+                        .collect(Collectors.toList()),
+                cartResponse.getTotals().getTotalPrice(),
+                userId
+        ).stream().map(VoucherMapper::convertVoucherToVoucherResponse).collect(Collectors.toList());
+
+        cartResponse.setSelectedVouchers(voucherResponseList);
 
         return ResponseEntity.ok().body(
                 new StandardResponse<>(

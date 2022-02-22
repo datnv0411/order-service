@@ -3,12 +3,12 @@ package vn.cmc.du21.orderservice.presentation.external.request;
 public class CartProductRequest {
     private long productId;
     private long sizeId;
-    private long quantity;
+    private int quantity;
 
     public CartProductRequest() {
     }
 
-    public CartProductRequest(long productId, long sizeId, long quantity) {
+    public CartProductRequest(long productId, long sizeId, int quantity) {
         this.productId = productId;
         this.sizeId = sizeId;
         this.quantity = quantity;
@@ -30,11 +30,11 @@ public class CartProductRequest {
         this.sizeId = sizeId;
     }
 
-    public long getQuantity() {
+    public int getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(long quantity) {
+    public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
 }

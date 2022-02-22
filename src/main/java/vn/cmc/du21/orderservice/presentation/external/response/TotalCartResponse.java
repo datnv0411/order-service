@@ -1,16 +1,16 @@
 package vn.cmc.du21.orderservice.presentation.external.response;
 
-public class TotalResponse {
+public class TotalCartResponse {
     private long totalPrice; // tong gia cac san pham (gia k sale)
     private long totalSale; // tong tien sale (cua tung san pham)
     private long shippingFee; // phi ship
     private long totalDiscount; // tong giam gia (phieu giam gia)
     private long totalPaySum; // tong tien phai tra
 
-    public TotalResponse() {
+    public TotalCartResponse() {
     }
 
-    public TotalResponse(long totalPrice, long totalSale, long shippingFee, long totalDiscount, long totalPaySum) {
+    public TotalCartResponse(long totalPrice, long totalSale, long shippingFee, long totalDiscount, long totalPaySum) {
         this.totalPrice = totalPrice;
         this.totalSale = totalSale;
         this.shippingFee = shippingFee;

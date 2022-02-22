@@ -4,7 +4,7 @@ public class VoucherResponse {
     private long voucherId;
     private String codeVoucher;
     private String startTime;
-    private String emdTime;
+    private String endTime;
     private int timesOfUse;
     private int quantity;
     private String image;
@@ -20,7 +20,7 @@ public class VoucherResponse {
         this.voucherId = voucherId;
         this.codeVoucher = codeVoucher;
         this.startTime = startTime;
-        this.emdTime = emdTime;
+        this.endTime = emdTime;
         this.timesOfUse = timesOfUse;
         this.quantity = quantity;
         this.image = image;
@@ -54,12 +54,12 @@ public class VoucherResponse {
         this.startTime = startTime;
     }
 
-    public String getEmdTime() {
-        return emdTime;
+    public String getEndTime() {
+        return endTime;
     }
 
-    public void setEmdTime(String emdTime) {
-        this.emdTime = emdTime;
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
     }
 
     public int getTimesOfUse() {

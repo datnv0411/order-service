@@ -1,6 +1,7 @@
 package vn.cmc.du21.orderservice.common;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.env.Environment;
 import org.springframework.web.client.RestTemplate;
 import vn.cmc.du21.orderservice.presentation.internal.response.UserResponse;
 
@@ -9,6 +10,7 @@ import java.time.temporal.ChronoUnit;
 
 @Slf4j
 public class JwtTokenProvider {
+    private static Environment env;
     private JwtTokenProvider() {
         throw new IllegalStateException("Utility class");
     }
@@ -25,7 +27,7 @@ public class JwtTokenProvider {
         log.info("Mapped getInfoUserFromToken method");
         String[] arr = request.getHeader("Authorization").split(" ");
         String token = arr[1];
-        final String uri = "http://192.168.66.125:8100/api/v1.0/authentication/verify?token=" + token;
+        final String uri = env.getProperty("path.user-service") + "/api/v1.0/authentication/verify?token=" + token;
 
         RestTemplate restTemplate = new RestTemplate();
         UserResponse userLogin = restTemplate.getForObject(uri, UserResponse.class);

@@ -5,12 +5,12 @@ import java.util.List;
 public class CartResponse {
     private List<VoucherResponse> selectedVouchers;
     private List<CartProductResponse> items;
-    private TotalResponse totals;
+    private TotalCartResponse totals;
 
     public CartResponse() {
     }
 
-    public CartResponse(List<VoucherResponse> selectedVouchers, List<CartProductResponse> items, TotalResponse totals) {
+    public CartResponse(List<VoucherResponse> selectedVouchers, List<CartProductResponse> items, TotalCartResponse totals) {
         this.selectedVouchers = selectedVouchers;
         this.items = items;
         this.totals = totals;
@@ -32,8 +32,8 @@ public class CartResponse {
         this.items = items;
     }
 
-    public TotalResponse getTotals() {
-        TotalResponse totalResponse = new TotalResponse();
+    public TotalCartResponse getTotals() {
+        TotalCartResponse totalResponse = new TotalCartResponse();
 
         long totalPrice = 0;
         for(CartProductResponse item : items)
@@ -46,7 +46,7 @@ public class CartResponse {
         long totalSalePrice = 0;
         for(CartProductResponse item : items)
         {
-            totalPrice += item.getTotalPrice();
+            totalSalePrice += item.getTotalPrice();
         }
         totalSale = totalPrice - totalSalePrice;
         totalResponse.setTotalSale(totalSale);
@@ -79,7 +79,7 @@ public class CartResponse {
         return totals;
     }
 
-    public void setTotals(TotalResponse totals) {
+    public void setTotals(TotalCartResponse totals) {
         this.totals = totals;
     }
 }
