@@ -1,20 +1,20 @@
 package vn.cmc.du21.orderservice.presentation.external.request;
 
 public class VoucherRequest {
-    private long voucherId;
+    private long voucherCode;
 
     public VoucherRequest() {
     }
 
-    public VoucherRequest(long voucherId) {
-        this.voucherId = voucherId;
+    public VoucherRequest(long voucherCode) {
+        this.voucherCode = voucherCode;
     }
 
-    public long getVoucherId() {
-        return voucherId;
+    public long getVoucherCode() {
+        return voucherCode;
     }
 
-    public void setVoucherId(long voucherId) {
-        this.voucherId = voucherId;
+    public void setVoucherCode(long voucherCode) {
+        this.voucherCode = voucherCode;
     }
 }

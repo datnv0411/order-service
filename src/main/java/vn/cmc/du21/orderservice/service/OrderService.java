@@ -118,12 +118,12 @@ public class OrderService {
         return totalAfterVAT(orderId) - totalVoucherDiscount(userId, orderId);
     }
 
-    /*@Transactional
+    @Transactional
     public Order createOrder(Order order){
         List<OrderProduct> orderProducts = new ArrayList<>();
         for (OrderProduct item : orderProducts){
-            List<OrderProduct> orderProduct = orderProductRepository.findByOrderProductId(item.getOrderProductId().getOrderId());
-
+            orderProducts = orderProductRepository.findByOrderProductId(item.getOrderProductId().getOrderId());
         }
-    }*/
+        order.setOrderProducts(orderProducts);
+    }
 }

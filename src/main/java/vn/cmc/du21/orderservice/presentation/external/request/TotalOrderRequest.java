@@ -1,6 +1,6 @@
 package vn.cmc.du21.orderservice.presentation.external.request;
 
-public class TotalRequest {
+public class TotalOrderRequest {
     private long totalPrice; // tổng tiền tạm tính
     private long totalDiscount; // tổng tiền giảm
     private long shippingFee; // phí ship
@@ -10,10 +10,10 @@ public class TotalRequest {
     private long totalVoucherDiscount;
     private long totalOrder; // tổng tiền phải trả
 
-    public TotalRequest() {
+    public TotalOrderRequest() {
     }
 
-    public TotalRequest(long totalPrice, long totalDiscount, long shippingFee, long totalBeforeVAT, long totalVAT, long totalAfterVAT, long totalVoucherDiscount, long totalOrder) {
+    public TotalOrderRequest(long totalPrice, long totalDiscount, long shippingFee, long totalBeforeVAT, long totalVAT, long totalAfterVAT, long totalVoucherDiscount, long totalOrder) {
         this.totalPrice = totalPrice;
         this.totalDiscount = totalDiscount;
         this.shippingFee = shippingFee;

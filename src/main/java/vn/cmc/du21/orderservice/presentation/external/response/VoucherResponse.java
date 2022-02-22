@@ -5,8 +5,8 @@ import java.sql.Timestamp;
 public class VoucherResponse {
     private long voucherId;
     private String codeVoucher;
-    private Timestamp startTime;
-    private Timestamp endTime;
+    private String startTime;
+    private String endTime;
     private int timesOfUse;
     private int quantity;
     private String image;
@@ -18,7 +18,7 @@ public class VoucherResponse {
     public VoucherResponse() {
     }
 
-    public VoucherResponse(long voucherId, String codeVoucher, Timestamp startTime, Timestamp emdTime
+    public VoucherResponse(long voucherId, String codeVoucher, String startTime, String emdTime
             , int timesOfUse, int quantity, String image, String title
             , int percentValue, int upToValue, int applicableValue) {
         this.voucherId = voucherId;
@@ -50,19 +50,19 @@ public class VoucherResponse {
         this.codeVoucher = codeVoucher;
     }
 
-    public Timestamp getStartTime() {
+    public String getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(Timestamp startTime) {
+    public void setStartTime(String startTime) {
         this.startTime = startTime;
     }
 
-    public Timestamp getEndTime() {
+    public String getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(Timestamp endTime) {
+    public void setEndTime(String endTime) {
         this.endTime = endTime;
     }
 
