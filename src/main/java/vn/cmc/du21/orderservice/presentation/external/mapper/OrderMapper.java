@@ -1,11 +1,8 @@
 package vn.cmc.du21.orderservice.presentation.external.mapper;
 
 import vn.cmc.du21.orderservice.persistence.internal.entity.Order;
-import vn.cmc.du21.orderservice.persistence.internal.entity.OrderPayment;
 import vn.cmc.du21.orderservice.persistence.internal.entity.Voucher;
-import vn.cmc.du21.orderservice.presentation.external.response.OrderProductResponse;
-import vn.cmc.du21.orderservice.presentation.external.response.OrderResponse;
-import vn.cmc.du21.orderservice.presentation.external.response.VoucherResponse;
+import vn.cmc.du21.orderservice.presentation.external.response.*;
 import vn.cmc.du21.orderservice.presentation.internal.response.AddressResponse;
 
 import java.util.ArrayList;
@@ -17,7 +14,7 @@ public class OrderMapper {
 
     public static OrderResponse convertToOrderResponse(
             Order order , List<OrderProductResponse> productResponses
-            , OrderPayment paymentResponse, AddressResponse addressResponse){
+            , OrderPaymentResponse paymentResponse, AddressResponse addressResponse, TotalResponse totalResponse){
 
         List<VoucherResponse> voucherResponses = new ArrayList<>();
         for (Voucher item : order.getVouchers())
@@ -40,6 +37,6 @@ public class OrderMapper {
 
         return new OrderResponse(order.getOrderId(), order.getUserId(), order.getAddressId(), order.getStatusOrder()
         , order.getNote(), order.getCreateTime(), order.getHoldTime(), order.getDeliveryTime()
-        , voucherResponses, productResponses, paymentResponse, addressResponse);
+        , voucherResponses, productResponses, paymentResponse, addressResponse, totalResponse);
     }
 }

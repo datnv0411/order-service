@@ -29,15 +29,18 @@ public class OrderResponse {
     private List<OrderProductResponse> productResponses;
 
     // payment response
-    private OrderPayment paymentResponse;
+    private OrderPaymentResponse paymentResponse;
 
     // address response
     private AddressResponse addressResponse;
 
+    // total response
+    private TotalResponse totalResponse;
+
     public OrderResponse() {
     }
 
-    public OrderResponse(long orderId, long userId, long addressId, String statusOrder, String note, Timestamp createTime, Timestamp holdTime, Timestamp deliveryTime, List<VoucherResponse> voucherResponses, List<OrderProductResponse> productResponses, OrderPayment paymentResponse, AddressResponse addressResponse) {
+    public OrderResponse(long orderId, long userId, long addressId, String statusOrder, String note, Timestamp createTime, Timestamp holdTime, Timestamp deliveryTime, List<VoucherResponse> voucherResponses, List<OrderProductResponse> productResponses, OrderPaymentResponse paymentResponse, AddressResponse addressResponse, TotalResponse totalResponse) {
         this.orderId = orderId;
         this.userId = userId;
         this.addressId = addressId;
@@ -50,6 +53,7 @@ public class OrderResponse {
         this.productResponses = productResponses;
         this.paymentResponse = paymentResponse;
         this.addressResponse = addressResponse;
+        this.totalResponse = totalResponse;
     }
 
     public long getOrderId() {
@@ -132,11 +136,11 @@ public class OrderResponse {
         this.productResponses = productResponses;
     }
 
-    public OrderPayment getPaymentResponse() {
+    public OrderPaymentResponse getPaymentResponse() {
         return paymentResponse;
     }
 
-    public void setPaymentResponse(OrderPayment paymentResponse) {
+    public void setPaymentResponse(OrderPaymentResponse paymentResponse) {
         this.paymentResponse = paymentResponse;
     }
 
@@ -146,5 +150,13 @@ public class OrderResponse {
 
     public void setAddressResponse(AddressResponse addressResponse) {
         this.addressResponse = addressResponse;
+    }
+
+    public TotalResponse getTotalResponse() {
+        return totalResponse;
+    }
+
+    public void setTotalResponse(TotalResponse totalResponse) {
+        this.totalResponse = totalResponse;
     }
 }

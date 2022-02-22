@@ -10,9 +10,12 @@ import vn.cmc.du21.orderservice.common.JwtTokenProvider;
 import vn.cmc.du21.orderservice.common.restful.StandardResponse;
 import vn.cmc.du21.orderservice.common.restful.StatusResponse;
 import vn.cmc.du21.orderservice.presentation.external.mapper.OrderMapper;
+import vn.cmc.du21.orderservice.presentation.external.mapper.OrderPaymentMapper;
 import vn.cmc.du21.orderservice.presentation.external.mapper.OrderProductMapper;
+import vn.cmc.du21.orderservice.presentation.external.response.OrderPaymentResponse;
 import vn.cmc.du21.orderservice.presentation.external.response.OrderProductResponse;
 import vn.cmc.du21.orderservice.presentation.external.response.OrderResponse;
+import vn.cmc.du21.orderservice.presentation.external.response.TotalResponse;
 import vn.cmc.du21.orderservice.presentation.internal.response.AddressResponse;
 import vn.cmc.du21.orderservice.presentation.internal.response.ProductResponse;
 import vn.cmc.du21.orderservice.presentation.internal.response.UserResponse;
@@ -101,9 +104,25 @@ public class OrderController {
 
         orderProductResponses = getDetailProduct(orderProductResponses);
 
+        // get order payment
+        OrderPaymentResponse orderPaymentResponse = OrderPaymentMapper.convertToOrderPaymentResponse(orderService.getPaymentByOrderId(userId, orderId));
+
+        // get total order
+        TotalResponse totalResponse = new TotalResponse();
+
+        totalResponse.setTotalPrice(orderService.totalPrice(orderId));
+        totalResponse.setTotalDiscount(orderService.totalDiscount(orderId));
+        totalResponse.setShippingFee(orderService.shippingFee(orderId));
+        totalResponse.setTotalBeforeVAT(orderService.totalBeforeVAT(orderId));
+        totalResponse.setTotalVAT(orderService.totalVAT(orderId));
+        totalResponse.setTotalAfterVAT(orderService.totalAfterVAT(orderId));
+        totalResponse.setTotalVoucherDiscount(orderService.totalVoucherDiscount(userId, orderId));
+        totalResponse.setTotalOrder(orderService.totalOrder(userId, orderId));
+
         OrderResponse orderResponse = OrderMapper.convertToOrderResponse(
                 orderService.getOrderByOrderId(userId, orderId), orderProductResponses
-                , orderService.getPaymentByOrderId(userId, orderId), addressResponse
+                , orderPaymentResponse, addressResponse
+                , totalResponse
         );
 
         return ResponseEntity.status(HttpStatus.OK).body(
@@ -145,9 +164,26 @@ public class OrderController {
 
         orderProductResponses = getDetailProduct(orderProductResponses);
 
+        // get order payment
+        OrderPaymentResponse orderPaymentResponse = OrderPaymentMapper.convertToOrderPaymentResponse(orderService.getPaymentByOrderId(userId, orderId));
+
+        // get total order
+        TotalResponse totalResponse = new TotalResponse();
+
+        totalResponse.setTotalPrice(orderService.totalPrice(orderId));
+        totalResponse.setTotalDiscount(orderService.totalDiscount(orderId));
+        totalResponse.setShippingFee(orderService.shippingFee(orderId));
+        totalResponse.setTotalBeforeVAT(orderService.totalBeforeVAT(orderId));
+        totalResponse.setTotalVAT(orderService.totalVAT(orderId));
+        totalResponse.setTotalAfterVAT(orderService.totalAfterVAT(orderId));
+        totalResponse.setTotalVoucherDiscount(orderService.totalVoucherDiscount(userId, orderId));
+        totalResponse.setTotalOrder(orderService.totalOrder(userId, orderId));
+
+
         OrderResponse orderResponse = OrderMapper.convertToOrderResponse(
                 orderService.updateOrder(orderId, userId), orderProductResponses
-                , orderService.getPaymentByOrderId(userId, orderId), addressResponse
+                , orderPaymentResponse, addressResponse
+                , totalResponse
         );
 
         return ResponseEntity.status(HttpStatus.OK).body(
