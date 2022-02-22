@@ -1,6 +1,5 @@
 package vn.cmc.du21.orderservice.presentation.external.controller;
 
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -18,6 +17,7 @@ import vn.cmc.du21.orderservice.persistence.internal.entity.CartProductId;
 import vn.cmc.du21.orderservice.presentation.external.mapper.CartProductMapper;
 import vn.cmc.du21.orderservice.presentation.external.request.CartProductRequest;
 import vn.cmc.du21.orderservice.presentation.external.response.CartProductResponse;
+import vn.cmc.du21.orderservice.presentation.external.response.CartResponse;
 import vn.cmc.du21.orderservice.presentation.internal.response.ProductResponse;
 import vn.cmc.du21.orderservice.presentation.internal.response.SizeResponse;
 import vn.cmc.du21.orderservice.service.CartService;
@@ -26,10 +26,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
-@RequestMapping(path = "/api/v1.0/cart")
+@RequestMapping(path = "api/v1.0/cart")
 public class CartController {
     @Autowired
     CartService cartService;
@@ -65,18 +66,18 @@ public class CartController {
                     if (item.isSizeDefault()) cartProductRequest.setSizeId(item.getSizeId());
                 }
             }
-            List<Long> listSizeId = new ArrayList<>();
-            for (SizeResponse item : listSize){
-                listSizeId.add(item.getSizeId());
-            }
-            if (!listSizeId.contains(cartProductRequest.getSizeId())){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                        new StandardResponse<>(
-                                StatusResponse.NOT_FOUND,
-                                "Size not found",""
-                        )
-                );
-            }
+//            List<Long> listSizeId = new ArrayList<>();
+//            for (SizeResponse item : listSize){
+//                listSizeId.add(item.getSizeId());
+//            }
+//            if (!listSizeId.contains(cartProductRequest.getSizeId())){
+//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+//                        new StandardResponse<>(
+//                                StatusResponse.NOT_FOUND,
+//                                "Size not found",""
+//                        )
+//                );
+//            }
 
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
@@ -94,7 +95,7 @@ public class CartController {
         for (CartProduct item : list){
             ProductResponse productResponse =
                     APIGetDetailProduct.getDetailProduct(request, item.getCartProductId().getProductId()).getData();
-            listResponse.add(CartProductMapper.convertCartProductToCartProductResponse(item,productResponse));
+            listResponse.add(CartProductMapper.convertToCartProductResponse(item,productResponse));
         }
         return ResponseEntity.status(HttpStatus.OK).body(
                 new StandardResponse<>(
@@ -135,7 +136,7 @@ public class CartController {
         for (CartProduct item : list){
             ProductResponse productResponse =
                     APIGetDetailProduct.getDetailProduct(request, item.getCartProductId().getProductId()).getData();
-            listResponse.add(CartProductMapper.convertCartProductToCartProductResponse(item,productResponse));
+            listResponse.add(CartProductMapper.convertToCartProductResponse(item,productResponse));
         }
         return ResponseEntity.status(HttpStatus.OK).body(
                 new StandardResponse<>(
@@ -170,6 +171,7 @@ public class CartController {
                 new StandardResponse<>(
                         StatusResponse.SUCCESSFUL,
                         "Deleted all",null
+
                 )
         );
     }

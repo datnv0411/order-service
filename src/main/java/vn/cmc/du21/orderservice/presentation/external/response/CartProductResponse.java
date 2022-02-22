@@ -1,124 +1,68 @@
 package vn.cmc.du21.orderservice.presentation.external.response;
 
+import vn.cmc.du21.orderservice.presentation.internal.response.ProductResponse;
+import vn.cmc.du21.orderservice.presentation.internal.response.SizeResponse;
 
 public class CartProductResponse {
-    private long productId;
-    private String productName;
-    private String quantitative;
-    private String description;
-    private String createTime;
-    private String productImage;
-    private long categoryId;
-    private String categoryName;
+    private ProductResponse productResponse;
     private long sizeId;
     private int quantity;
-    private long price;
-    private long priceSale;
+
+    private long totalPrice;
+
+    public long getPriceWithoutSale()
+    {
+        for (SizeResponse item : productResponse.getSizeResponseList())
+        {
+            if(item.getSizeId() == sizeId)
+            {
+                return item.getPrice() * quantity;
+            }
+        }
+
+        throw new RuntimeException("Size is not available -- get total price in CartProductResponse !!!");
+    }
 
     public CartProductResponse() {
     }
 
-    public CartProductResponse(long productId, String productName, String quantitative, String description, String createTime, String productImage, long categoryId, String categoryName, long sizeId, int quantity, long price, long priceSale) {
-        this.productId = productId;
-        this.productName = productName;
-        this.quantitative = quantitative;
-        this.description = description;
-        this.createTime = createTime;
-        this.productImage = productImage;
-        this.categoryId = categoryId;
-        this.categoryName = categoryName;
+
+    public CartProductResponse(ProductResponse productResponse, long sizeId, int quantity) {
+        this.productResponse = productResponse;
         this.sizeId = sizeId;
         this.quantity = quantity;
-        this.price = price;
-        this.priceSale = priceSale;
     }
 
-    public long getPrice() {
-        return price;
-    }
-
-    public void setPrice(long price) {
-        this.price = price;
-    }
-
-    public long getPriceSale() {
-        return priceSale;
-    }
-
-    public void setPriceSale(long priceSale) {
-        this.priceSale = priceSale;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
+    public CartProductResponse(ProductResponse productResponse, long sizeId, int quantity, long totalPrice) {
+        this.productResponse = productResponse;
+        this.sizeId = sizeId;
         this.quantity = quantity;
+        this.totalPrice = totalPrice;
     }
 
-    public long getProductId() {
-        return productId;
+    public ProductResponse getProductResponse() {
+        return productResponse;
     }
 
-    public void setProductId(long productId) {
-        this.productId = productId;
+    public void setProductResponse(ProductResponse productResponse) {
+        this.productResponse = productResponse;
     }
 
-    public String getProductName() {
-        return productName;
+    public long getTotalPrice() {
+        for (SizeResponse item : productResponse.getSizeResponseList())
+        {
+            if(item.getSizeId() == sizeId)
+            {
+                return item.getPriceSale() * quantity;
+            }
+        }
+
+        throw new RuntimeException("Size is not available -- get total price in CartProductResponse !!!");
     }
 
-    public void setProductName(String productName) {
-        this.productName = productName;
-    }
+    public void setTotalPrice(long totalPrice) {
+        this.totalPrice = totalPrice;
 
-    public String getQuantitative() {
-        return quantitative;
-    }
-
-    public void setQuantitative(String quantitative) {
-        this.quantitative = quantitative;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(String createTime) {
-        this.createTime = createTime;
-    }
-
-    public String getProductImage() {
-        return productImage;
-    }
-
-    public void setProductImage(String productImage) {
-        this.productImage = productImage;
-    }
-
-    public long getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(long categoryId) {
-        this.categoryId = categoryId;
-    }
-
-    public String getCategoryName() {
-        return categoryName;
-    }
-
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
     }
 
     public long getSizeId() {
@@ -127,5 +71,13 @@ public class CartProductResponse {
 
     public void setSizeId(long sizeId) {
         this.sizeId = sizeId;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 }

@@ -28,8 +28,7 @@ public class CartService {
 
     @Transactional
     public Cart findCart (long userId){
-        Cart cart = cartRepository.findByUserId(userId);
-        return cart;
+        return cartRepository.findByUserId(userId).orElse(null);
     }
     @Transactional
     public void addProduct (CartProduct cartProduct){
