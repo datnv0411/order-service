@@ -10,19 +10,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import vn.cmc.du21.orderservice.common.JwtTokenProvider;
+import vn.cmc.du21.orderservice.common.APIGetDetailProduct;
 import vn.cmc.du21.orderservice.common.restful.StandardResponse;
 import vn.cmc.du21.orderservice.common.restful.StatusResponse;
+import vn.cmc.du21.orderservice.persistence.internal.entity.CartProduct;
 import vn.cmc.du21.orderservice.persistence.internal.entity.CartProductId;
 import vn.cmc.du21.orderservice.presentation.external.mapper.CartProductMapper;
 import vn.cmc.du21.orderservice.presentation.external.request.CartProductRequest;
+import vn.cmc.du21.orderservice.presentation.external.response.CartProductResponse;
 import vn.cmc.du21.orderservice.presentation.internal.response.ProductResponse;
 import vn.cmc.du21.orderservice.presentation.internal.response.SizeResponse;
-import vn.cmc.du21.orderservice.presentation.internal.response.UserResponse;
 import vn.cmc.du21.orderservice.service.CartService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -55,20 +57,25 @@ public class CartController {
             cartService.createCart(userId);
         }
         try{
-            final String uri = "http://192.168.66.125:8200/api/v1.0/product/get-detail-product/" + String.valueOf(cartProductRequest.getProductId());
-
-            RestTemplate restTemplate = new RestTemplate();
-            HttpEntity<StandardResponse<ProductResponse>> requestt = new HttpEntity<>(new StandardResponse<ProductResponse>());
-            ResponseEntity<StandardResponse<ProductResponse>> responsee = restTemplate
-                    .exchange(uri, HttpMethod.GET, requestt, new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {
-                    });
-
-            StandardResponse<ProductResponse> productResponse = responsee.getBody();
+            StandardResponse<ProductResponse> productResponse =
+                    APIGetDetailProduct.getDetailProduct(request, cartProductRequest.getProductId());
+            List<SizeResponse> listSize = productResponse.getData().getSizeResponseList();
             if(cartProductRequest.getSizeId() == 0){
-                List<SizeResponse> listSize = productResponse.getData().getSizeResponseList();
                 for (SizeResponse item : listSize){
                     if (item.isSizeDefault()) cartProductRequest.setSizeId(item.getSizeId());
                 }
+            }
+            List<Long> listSizeId = new ArrayList<>();
+            for (SizeResponse item : listSize){
+                listSizeId.add(item.getSizeId());
+            }
+            if (!listSizeId.contains(cartProductRequest.getSizeId())){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        new StandardResponse<>(
+                                StatusResponse.NOT_FOUND,
+                                "Size not found",""
+                        )
+                );
             }
 
         }catch (Exception e){
@@ -82,10 +89,17 @@ public class CartController {
         cartProductRequest.setCartId(cartService.findCart(userId).getCartId());
         cartService.addProduct(CartProductMapper.convertCartProductRequestToCartProduct(cartProductRequest,cartService.findCart(userId)));
 
+        List<CartProductResponse> listResponse = new ArrayList<>();
+        List<CartProduct> list = cartService.findAllByCartId(cartProductRequest.getCartId());
+        for (CartProduct item : list){
+            ProductResponse productResponse =
+                    APIGetDetailProduct.getDetailProduct(request, item.getCartProductId().getProductId()).getData();
+            listResponse.add(CartProductMapper.convertCartProductToCartProductResponse(item,productResponse));
+        }
         return ResponseEntity.status(HttpStatus.OK).body(
                 new StandardResponse<>(
                         StatusResponse.SUCCESSFUL,
-                        "Added",""
+                        "Added",listResponse
                 )
         );
 
@@ -115,10 +129,18 @@ public class CartController {
 
         CartProductId cartProductId = new CartProductId(cartService.findCart(userId).getCartId(), productId, sizeId);
         cartService.removeProduct(cartProductId);
+
+        List<CartProductResponse> listResponse = new ArrayList<>();
+        List<CartProduct> list = cartService.findAllByCartId(cartService.findCart(userId).getCartId());
+        for (CartProduct item : list){
+            ProductResponse productResponse =
+                    APIGetDetailProduct.getDetailProduct(request, item.getCartProductId().getProductId()).getData();
+            listResponse.add(CartProductMapper.convertCartProductToCartProductResponse(item,productResponse));
+        }
         return ResponseEntity.status(HttpStatus.OK).body(
                 new StandardResponse<>(
                         StatusResponse.SUCCESSFUL,
-                        "Deleted",""
+                        "Deleted",listResponse
                 )
         );
     }
@@ -147,7 +169,7 @@ public class CartController {
         return ResponseEntity.status(HttpStatus.OK).body(
                 new StandardResponse<>(
                         StatusResponse.SUCCESSFUL,
-                        "Deleted all",""
+                        "Deleted all",null
                 )
         );
     }

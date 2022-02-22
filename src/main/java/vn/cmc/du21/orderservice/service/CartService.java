@@ -55,4 +55,9 @@ public class CartService {
     public void removeAll(long cartId){
         cartProductRepository.deleteAllByCartProductId_CartId(cartId);
     }
+    @Transactional
+    public List<CartProduct> findAllByCartId (long cartId){
+        List<CartProduct> list = cartProductRepository.findAllByCartProductId_CartId(cartId);
+        return  list;
+    }
 }
