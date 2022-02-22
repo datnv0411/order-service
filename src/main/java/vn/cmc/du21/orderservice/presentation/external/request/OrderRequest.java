@@ -26,9 +26,10 @@ public class OrderRequest {
     public OrderRequest() {
     }
 
-    public OrderRequest(long userId, long addressId, String statusOrder, String note, Timestamp createTime, Timestamp holdTime, Timestamp deliveryTime, List<VoucherRequest> voucherRequests, List<OrderProductRequest> productRequests) {
+    public OrderRequest(long userId, long addressId, long paymentId, String statusOrder, String note, Timestamp createTime, Timestamp holdTime, Timestamp deliveryTime, List<VoucherRequest> voucherRequests, List<OrderProductRequest> productRequests) {
         this.userId = userId;
         this.addressId = addressId;
+        this.paymentId = paymentId;
         this.statusOrder = statusOrder;
         this.note = note;
         this.createTime = createTime;
@@ -52,6 +53,14 @@ public class OrderRequest {
 
     public void setAddressId(long addressId) {
         this.addressId = addressId;
+    }
+
+    public long getPaymentId() {
+        return paymentId;
+    }
+
+    public void setPaymentId(long paymentId) {
+        this.paymentId = paymentId;
     }
 
     public String getStatusOrder() {
@@ -108,21 +117,5 @@ public class OrderRequest {
 
     public void setProductRequests(List<OrderProductRequest> productRequests) {
         this.productRequests = productRequests;
-    }
-
-    public OrderPaymentRequest getPaymentRequest() {
-        return paymentRequest;
-    }
-
-    public void setPaymentRequest(OrderPaymentRequest paymentRequest) {
-        this.paymentRequest = paymentRequest;
-    }
-
-    public AddressRequest getAddressRequest() {
-        return addressRequest;
-    }
-
-    public void setAddressRequest(AddressRequest addressRequest) {
-        this.addressRequest = addressRequest;
     }
 }
