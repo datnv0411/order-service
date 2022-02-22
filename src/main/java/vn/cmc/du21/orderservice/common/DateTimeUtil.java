@@ -47,7 +47,8 @@ public class DateTimeUtil {
         return Timestamp.valueOf(localDateTime);
     }
 
-    public static LocalDateTime sqlTimestampToLocalDateTime(Timestamp timestamp) {
+    public static LocalDateTime sqlTimestampToLocalDateTime(Timestamp timestamp)
+    {
         return timestamp.toLocalDateTime();
     }
 
