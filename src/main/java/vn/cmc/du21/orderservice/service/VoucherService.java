@@ -75,14 +75,20 @@ public class VoucherService {
     public void SaveVoucher(long userId, String codeVoucher) throws Throwable{
         Optional<Voucher> voucher =voucherRepository.findByCodeVoucher(codeVoucher);
         if(voucher.isPresent()){
-            VoucherUserId voucherUserId = new VoucherUserId();
-            voucherUserId.setVoucherId(voucher.get().getVoucherId());
-            voucherUserId.setUserId(userId);
-            VoucherUser voucherUser = new VoucherUser();
-            voucherUser.setVoucherUserId(voucherUserId);
-            voucherUser.setUsedTimes(0);
-            voucherUser.setVoucher(voucher.get());
-            voucherUserRepository.save(voucherUser);
+            Optional<VoucherUser> voucherUsers = voucherUserRepository
+                    .findByVoucherIdAndUserId(voucher.get().getVoucherId(), userId);
+            if (!voucherUsers.isPresent()) {
+                VoucherUserId voucherUserId = new VoucherUserId();
+                voucherUserId.setVoucherId(voucher.get().getVoucherId());
+                voucherUserId.setUserId(userId);
+                VoucherUser voucherUser = new VoucherUser();
+                voucherUser.setVoucherUserId(voucherUserId);
+                voucherUser.setUsedTimes(0);
+                voucherUser.setVoucher(voucher.get());
+                voucherUserRepository.save(voucherUser);
+            }else {
+                throw new RuntimeException("The voucher already on!! ");
+            }
         }else {
             throw new RuntimeException("Not found");
         }
