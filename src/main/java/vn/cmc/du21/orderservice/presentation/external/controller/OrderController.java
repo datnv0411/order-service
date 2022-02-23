@@ -152,6 +152,21 @@ public class OrderController {
         );
     }
 
+    ResponseEntity<Object> checkToken(HttpServletRequest request, HttpServletResponse response) {
+        UserResponse userLogin;
+        try {
+            userLogin = JwtTokenProvider.getInfoUserFromToken(request);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    new StandardResponse<>(
+                            StatusResponse.UNAUTHORIZED,
+                            "Bad token!!!"
+                    )
+            );
+
+        }
+    }
+
     // update status - cancel
     @PutMapping("/order/cancel/{orderId}")
     ResponseEntity<Object> updateStatusOrder(@PathVariable(name = "orderId") long orderId,
