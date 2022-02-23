@@ -1,6 +1,10 @@
 package vn.cmc.du21.orderservice.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import vn.cmc.du21.orderservice.persistence.internal.entity.*;
 import vn.cmc.du21.orderservice.persistence.internal.repository.DeliveryAddressRepository;
@@ -139,5 +143,21 @@ public class OrderService {
 
     public DeliveryAddress getDeliveryAddressByOrderId(long deliveryAddressId) {
         return deliveryAddressRepository.findById(deliveryAddressId).orElse(null);
+    }
+
+    @Transactional
+    public Page<Order> getListOrder(int page, int size, String status, String startTime, String endTime, long userId){
+        List<Order> orders = new ArrayList<>();
+
+        if (status.equals("all")){
+            orders = orderRepository.findAllOrder(userId, endTime, startTime);
+        } else {
+            orders = orderRepository.findAllOrderByStatusOrder(userId, endTime, startTime, status);
+        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        final int start = (int)pageable.getOffset();
+        final int end = Math.min((start + pageable.getPageSize()), orders.size());
+        return new PageImpl<>(orders.subList(start, end), pageable, orders.size());
     }
 }

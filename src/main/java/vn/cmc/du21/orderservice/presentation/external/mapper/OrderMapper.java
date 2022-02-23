@@ -42,4 +42,11 @@ public class OrderMapper {
                 , DateTimeUtil.timestampToString(order.getDeliveryTime()), voucherResponses, productResponses
                 , paymentResponse, addressResponse, totalResponse);
     }
+
+    public static OrderResponse convertOrderToOrderResponse(Order order, List<OrderProductResponse> productResponses
+            , TotalOrderResponse totalResponse){
+        return new OrderResponse(order.getOrderId(), order.getUserId(), order.getStatusOrder()
+                , DateTimeUtil.timestampToString(order.getCreateTime())
+                , productResponses, totalResponse);
+    }
 }
