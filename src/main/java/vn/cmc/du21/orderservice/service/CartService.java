@@ -84,7 +84,6 @@ public class CartService {
     }
     @Transactional
     public List<CartProduct> findAllByCartId (long cartId){
-        List<CartProduct> list = cartProductRepository.findAllByCartProductId_CartId(cartId);
-        return  list;
+        return cartProductRepository.findAllByCartProductId_CartId(cartId);
     }
 }

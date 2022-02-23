@@ -11,7 +11,6 @@ import vn.cmc.du21.orderservice.persistence.internal.repository.DeliveryAddressR
 import vn.cmc.du21.orderservice.persistence.internal.repository.OrderProductRepository;
 import vn.cmc.du21.orderservice.persistence.internal.repository.OrderRepository;
 import vn.cmc.du21.orderservice.persistence.internal.repository.VoucherRepository;
-import vn.cmc.du21.orderservice.presentation.external.response.DeliveryAddressResponse;
 
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
@@ -156,7 +155,7 @@ public class OrderService {
 
     @Transactional
     public Page<Order> getListOrder(int page, int size, String status, String startTime, String endTime, long userId){
-        List<Order> orders = new ArrayList<>();
+        List<Order> orders;
 
         if (status.equals("all")){
             orders = orderRepository.findAllOrder(userId, endTime, startTime);

@@ -10,19 +10,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import vn.cmc.du21.orderservice.common.JwtTokenProvider;
 import vn.cmc.du21.orderservice.common.restful.StandardResponse;
 import vn.cmc.du21.orderservice.common.restful.StatusResponse;
 import vn.cmc.du21.orderservice.persistence.internal.entity.CartProduct;
 import vn.cmc.du21.orderservice.persistence.internal.entity.CartProductId;
 import vn.cmc.du21.orderservice.presentation.external.mapper.CartProductMapper;
 import vn.cmc.du21.orderservice.presentation.external.mapper.VoucherMapper;
-import vn.cmc.du21.orderservice.presentation.external.request.CartRequest;
 import vn.cmc.du21.orderservice.presentation.external.request.CartProductRequest;
+import vn.cmc.du21.orderservice.presentation.external.request.CartRequest;
 import vn.cmc.du21.orderservice.presentation.external.response.CartProductResponse;
 import vn.cmc.du21.orderservice.presentation.external.response.CartResponse;
 import vn.cmc.du21.orderservice.presentation.external.response.VoucherResponse;
 import vn.cmc.du21.orderservice.presentation.internal.response.ProductResponse;
 import vn.cmc.du21.orderservice.presentation.internal.response.SizeResponse;
+import vn.cmc.du21.orderservice.presentation.internal.response.UserResponse;
 import vn.cmc.du21.orderservice.service.CartService;
 import vn.cmc.du21.orderservice.service.VoucherService;
 
@@ -43,11 +45,26 @@ public class CartController {
     @Autowired
     VoucherService voucherService;
 
+    private static final String GET_DETAIL_PRODUCT = "/api/v1.0/product/get-detail-product/";
+    private static final String PATH_INVENTORY_SERVICE = "path.inventory-service";
+
     @GetMapping(path = "/my-cart")
-    ResponseEntity<Object> cartDetail()
+    ResponseEntity<Object> cartDetail(HttpServletRequest request, HttpServletResponse response)
     {
         log.info("Mapped cartDetail method {{GET: /cart/my-cart}}");
-        long userId = 1L;
+        UserResponse userLogin;
+        try {
+            userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    new StandardResponse<>(
+                            StatusResponse.UNAUTHORIZED,
+                            "Bad token!!!"
+                    )
+            );
+        }
+
+        long userId = userLogin.getUserId();
 
         CartResponse cartResponse = new CartResponse();
 
@@ -58,16 +75,16 @@ public class CartController {
                 .collect(Collectors.toList());
 
         for (CartProductResponse item : cartProductResponseList) {
-            final String uri = env.getProperty("path.inventory-service") + "/api/v1.0/product/get-detail-product/" +
+            final String uri = env.getProperty(PATH_INVENTORY_SERVICE) + GET_DETAIL_PRODUCT +
                     item.getProductResponse().getProductId();
 
             RestTemplate restTemplate = new RestTemplate();
-            HttpEntity<StandardResponse<ProductResponse>> request = new HttpEntity<>(new StandardResponse<>());
-            ResponseEntity<StandardResponse<ProductResponse>> response = restTemplate
-                    .exchange(uri, HttpMethod.GET, request, new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {
+            HttpEntity<StandardResponse<ProductResponse>> requestItem = new HttpEntity<>(new StandardResponse<>());
+            ResponseEntity<StandardResponse<ProductResponse>> responseItem = restTemplate
+                    .exchange(uri, HttpMethod.GET, requestItem, new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {
                     });
 
-            StandardResponse<ProductResponse> productResponse = response.getBody();
+            StandardResponse<ProductResponse> productResponse = responseItem.getBody();
 
             item.setProductResponse(productResponse.getData());
         }
@@ -84,9 +101,24 @@ public class CartController {
     }
 
     @PutMapping("/update")
-    ResponseEntity<Object> updateCart(@RequestBody CartRequest cartRequest) {
+    ResponseEntity<Object> updateCart(@RequestBody CartRequest cartRequest,
+                                      HttpServletRequest request, HttpServletResponse response) {
+
         log.info("Mapped updateCart method {{GET: /cart/update}}");
-        long userId = 1L;
+        UserResponse userLogin;
+        try {
+            userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    new StandardResponse<>(
+                            StatusResponse.UNAUTHORIZED,
+                            "Bad token!!!"
+                    )
+            );
+        }
+
+        long userId = userLogin.getUserId();
+
         // update cart - save database
         cartService.updateProductOnCart(
                 cartRequest.getProductRequests()
@@ -104,16 +136,16 @@ public class CartController {
                 .collect(Collectors.toList());
 
         for (CartProductResponse item : cartProductResponseList) {
-            final String uri = env.getProperty("path.inventory-service") + "/api/v1.0/product/get-detail-product/" +
+            final String uri = env.getProperty(PATH_INVENTORY_SERVICE) + GET_DETAIL_PRODUCT +
                     item.getProductResponse().getProductId();
 
             RestTemplate restTemplate = new RestTemplate();
-            HttpEntity<StandardResponse<ProductResponse>> request = new HttpEntity<>(new StandardResponse<>());
-            ResponseEntity<StandardResponse<ProductResponse>> response = restTemplate
-                    .exchange(uri, HttpMethod.GET, request, new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {
+            HttpEntity<StandardResponse<ProductResponse>> requestItem = new HttpEntity<>(new StandardResponse<>());
+            ResponseEntity<StandardResponse<ProductResponse>> responseItem = restTemplate
+                    .exchange(uri, HttpMethod.GET, requestItem, new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {
                     });
 
-            StandardResponse<ProductResponse> productResponse = response.getBody();
+            StandardResponse<ProductResponse> productResponse = responseItem.getBody();
 
             item.setProductResponse(productResponse.getData());
         }
@@ -143,27 +175,31 @@ public class CartController {
     @GetMapping("/add")
     ResponseEntity<Object> addProduct (@RequestBody CartProductRequest cartProductRequest
                                         , HttpServletRequest request, HttpServletResponse response) {
+
         log.info("Mapped addProduct method {{GET: /add}}");
+
         if (cartProductRequest.getQuantity() == 0) cartProductRequest.setQuantity(1);
-//        UserResponse userLogin;
-//        try {
-//            userLogin = JwtTokenProvider.getInfoUserFromToken(request);
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-//                    new StandardResponse<>(
-//                            StatusResponse.UNAUTHORIZED,
-//                            "Bad token!!!"
-//                    )
-//            );
-//        }
-//        long userId = userLogin.getUserId();
-        long userId = 1;
+
+        UserResponse userLogin;
+        try {
+            userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    new StandardResponse<>(
+                            StatusResponse.UNAUTHORIZED,
+                            "Bad token!!!"
+                    )
+            );
+        }
+
+        long userId = userLogin.getUserId();
+        
         //check cart exist
         if(cartService.findCart(userId)==null){
             cartService.createCart(userId);
         }
         try{
-            final String uri = "http://192.168.66.125:8200/api/v1.0/product/get-detail-product/" + cartProductRequest.getProductId();
+            final String uri = env.getProperty(PATH_INVENTORY_SERVICE) + GET_DETAIL_PRODUCT + cartProductRequest.getProductId();
 
             RestTemplate restTemplate = new RestTemplate();
             HttpEntity<StandardResponse<ProductResponse>> requestProduct = new HttpEntity<>(new StandardResponse<>());
@@ -195,7 +231,7 @@ public class CartController {
         List<CartProductResponse> listResponse = new ArrayList<>();
         List<CartProduct> list = cartService.findAllByCartId(cartProductRequest.getCartId());
         for (CartProduct item : list){
-            final String uri = "http://192.168.66.125:8200/api/v1.0/product/get-detail-product/" + item.getCartProductId().getProductId();
+            final String uri = env.getProperty(PATH_INVENTORY_SERVICE) + GET_DETAIL_PRODUCT + item.getCartProductId().getProductId();
 
             RestTemplate restTemplate = new RestTemplate();
             HttpEntity<StandardResponse<ProductResponse>> requestProduct = new HttpEntity<>(new StandardResponse<>());
@@ -219,20 +255,22 @@ public class CartController {
     ResponseEntity<Object> removeProduct(@RequestParam(name = "productId", required = true) long productId
                                         , @RequestParam(name = "sizeId", required = true) long sizeId
                                         , HttpServletRequest request, HttpServletResponse response) throws Throwable{
+
         log.info("Mapped removeProduct method {{DELETE: /remove}}");
-//        UserResponse userLogin;
-//        try {
-//            userLogin = JwtTokenProvider.getInfoUserFromToken(request);
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-//                    new StandardResponse<>(
-//                            StatusResponse.UNAUTHORIZED,
-//                            "Bad token!!!"
-//                    )
-//            );
-//        }
-//        long userId = userLogin.getUserId();
-        long userId = 1;
+        UserResponse userLogin;
+        try {
+            userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    new StandardResponse<>(
+                            StatusResponse.UNAUTHORIZED,
+                            "Bad token!!!"
+                    )
+            );
+        }
+
+        long userId = userLogin.getUserId();
+
         if(cartService.findCart(userId)==null){
             cartService.createCart(userId);
         }
@@ -243,7 +281,7 @@ public class CartController {
         List<CartProductResponse> listResponse = new ArrayList<>();
         List<CartProduct> list = cartService.findAllByCartId(cartService.findCart(userId).getCartId());
         for (CartProduct item : list){
-            final String uri = "http://192.168.66.125:8200/api/v1.0/product/get-detail-product/" + item.getCartProductId().getProductId();
+            final String uri = env.getProperty(PATH_INVENTORY_SERVICE) + GET_DETAIL_PRODUCT + item.getCartProductId().getProductId();
 
             RestTemplate restTemplate = new RestTemplate();
             HttpEntity<StandardResponse<ProductResponse>> requestProduct = new HttpEntity<>(new StandardResponse<>());
@@ -265,19 +303,20 @@ public class CartController {
 
     @DeleteMapping("/quick-remove")
     ResponseEntity<Object> quickRemove(HttpServletRequest request, HttpServletResponse response){
+
         log.info("Mapped removeProduct method {{DELETE: /quick-remove}}");
-//        UserResponse userLogin;
-//        try {
-//            userLogin = JwtTokenProvider.getInfoUserFromToken(request);
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-//                    new StandardResponse<>(
-//                            StatusResponse.UNAUTHORIZED,
-//                            "Bad token!!!"
-//                    )
-//            );
-//        }
-//        long userId = userLogin.getUserId();
+        UserResponse userLogin;
+        try {
+            userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    new StandardResponse<>(
+                            StatusResponse.UNAUTHORIZED,
+                            "Bad token!!!"
+                    )
+            );
+        }
+        long userId = userLogin.getUserId();
 
         if(cartService.findCart(userId)==null){
             cartService.createCart(userId);
