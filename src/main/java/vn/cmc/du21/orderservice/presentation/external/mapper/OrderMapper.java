@@ -7,7 +7,6 @@ import vn.cmc.du21.orderservice.presentation.external.request.OrderRequest;
 import vn.cmc.du21.orderservice.presentation.external.response.*;
 import vn.cmc.du21.orderservice.presentation.external.response.DeliveryAddressResponse;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,8 +46,7 @@ public class OrderMapper {
                 , paymentResponse, addressResponse, totalResponse);
     }
 
-    public static Order convertOrderRequestToOrder(OrderRequest orderRequest)
-    {
+    public static Order convertOrderRequestToOrder(OrderRequest orderRequest) {
         Order order = new Order();
 
         order.setPaymentId(orderRequest.getPaymentId());
@@ -66,5 +64,12 @@ public class OrderMapper {
                 .collect(Collectors.toList()));
 
         return order;
+    }
+
+    public static OrderResponse convertOrderToOrderResponse(Order order, List<OrderProductResponse> productResponses
+            , TotalOrderResponse totalResponse){
+        return new OrderResponse(order.getOrderId(), order.getUserId(), order.getStatusOrder()
+                , DateTimeUtil.timestampToString(order.getCreateTime())
+                , productResponses, totalResponse);
     }
 }

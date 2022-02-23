@@ -4,10 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import vn.cmc.du21.orderservice.common.DateTimeUtil;
 import vn.cmc.du21.orderservice.common.JwtTokenProvider;
+import vn.cmc.du21.orderservice.common.restful.PageResponse;
 import vn.cmc.du21.orderservice.common.restful.StandardResponse;
 import vn.cmc.du21.orderservice.common.restful.StatusResponse;
 import vn.cmc.du21.orderservice.persistence.internal.entity.OrderProduct;
@@ -22,6 +25,7 @@ import vn.cmc.du21.orderservice.service.OrderService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -75,6 +79,22 @@ public class OrderController {
         return orderProductResponses;
     }
 
+    // get total order
+    public TotalOrderResponse getTotalOrder(long userId, long orderId){
+        TotalOrderResponse totalResponse = new TotalOrderResponse();
+
+        totalResponse.setTotalPrice(orderService.totalPrice(orderId));
+        totalResponse.setTotalDiscount(orderService.totalDiscount(orderId));
+        totalResponse.setShippingFee(orderService.shippingFee(orderId));
+        totalResponse.setTotalBeforeVAT(orderService.totalBeforeVAT(orderId));
+        totalResponse.setTotalVAT(orderService.totalVAT(orderId));
+        totalResponse.setTotalAfterVAT(orderService.totalAfterVAT(orderId));
+        totalResponse.setTotalVoucherDiscount(orderService.totalVoucherDiscount(userId, orderId));
+        totalResponse.setTotalOrder(orderService.totalOrder(userId, orderId));
+
+        return totalResponse;
+    }
+
     //get detail order
     @GetMapping("/order/{orderId}")
     ResponseEntity<Object> getDetailOrder(@PathVariable(name = "orderId") long orderId,
@@ -112,16 +132,7 @@ public class OrderController {
         OrderPaymentResponse orderPaymentResponse = OrderPaymentMapper.convertToOrderPaymentResponse(orderService.getPaymentByOrderId(userId, orderId));
 
         // get total order
-        TotalOrderResponse totalResponse = new TotalOrderResponse();
-
-        totalResponse.setTotalPrice(orderService.totalPrice(orderId));
-        totalResponse.setTotalDiscount(orderService.totalDiscount(orderId));
-        totalResponse.setShippingFee(orderService.shippingFee(orderId));
-        totalResponse.setTotalBeforeVAT(orderService.totalBeforeVAT(orderId));
-        totalResponse.setTotalVAT(orderService.totalVAT(orderId));
-        totalResponse.setTotalAfterVAT(orderService.totalAfterVAT(orderId));
-        totalResponse.setTotalVoucherDiscount(orderService.totalVoucherDiscount(userId, orderId));
-        totalResponse.setTotalOrder(orderService.totalOrder(userId, orderId));
+        TotalOrderResponse totalResponse = getTotalOrder(userId, orderId);
 
         OrderResponse orderResponse = OrderMapper.convertToOrderResponse(
                 orderService.getOrderByOrderId(userId, orderId), orderProductResponses
@@ -175,17 +186,7 @@ public class OrderController {
         OrderPaymentResponse orderPaymentResponse = OrderPaymentMapper.convertToOrderPaymentResponse(orderService.getPaymentByOrderId(userId, orderId));
 
         // get total order
-        TotalOrderResponse totalResponse = new TotalOrderResponse();
-
-        totalResponse.setTotalPrice(orderService.totalPrice(orderId));
-        totalResponse.setTotalDiscount(orderService.totalDiscount(orderId));
-        totalResponse.setShippingFee(orderService.shippingFee(orderId));
-        totalResponse.setTotalBeforeVAT(orderService.totalBeforeVAT(orderId));
-        totalResponse.setTotalVAT(orderService.totalVAT(orderId));
-        totalResponse.setTotalAfterVAT(orderService.totalAfterVAT(orderId));
-        totalResponse.setTotalVoucherDiscount(orderService.totalVoucherDiscount(userId, orderId));
-        totalResponse.setTotalOrder(orderService.totalOrder(userId, orderId));
-
+        TotalOrderResponse totalResponse = getTotalOrder(userId, orderId);
 
         OrderResponse orderResponse = OrderMapper.convertToOrderResponse(
                 orderService.updateOrder(orderId, userId), orderProductResponses
@@ -264,6 +265,67 @@ public class OrderController {
                 new StandardResponse<>(
                         StatusResponse.SUCCESSFUL,
                         "Success!!"
+                )
+        );
+    }
+
+    // get list order
+    @GetMapping("/order")
+    ResponseEntity<Object> getListOrder(@RequestParam(value = "statusOrder",required = false) String statusOrder
+                                        , @RequestParam(value = "startTime", required = false) String startTime
+                                        , @RequestParam(value = "endTime", required = false) String endTime
+                                        , @RequestParam(value = "page",required = false) String page
+                                        , @RequestParam(value = "size",required = false) String size
+                                        ,  HttpServletRequest request, HttpServletResponse response) {
+
+        log.info("Mapped getListOrder method {{GET: /order}}");
+
+        UserResponse userLogin;
+        try {
+            userLogin = JwtTokenProvider.getInfoUserFromToken(request);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    new StandardResponse<>(
+                            StatusResponse.UNAUTHORIZED,
+                            "Bad token!!!"
+                    )
+            );
+        }
+
+        long userId = userLogin.getUserId();
+        //long userId = 1;
+
+        if (page==null || !page.chars().allMatch(Character::isDigit) || page.equals("")) page="1";
+        if (size==null || !size.chars().allMatch(Character::isDigit) || size.equals("")) size="5";
+        if (statusOrder==null || statusOrder.equals("")) statusOrder="all";
+        if (endTime==null || endTime.equals("")) endTime=LocalDateTime.now().toString();
+        if (startTime==null || startTime.equals("")) startTime=(LocalDateTime.now().minusMonths(1)).toString();
+
+        int pageInt = Integer.parseInt(page)-1;
+        int sizeInt = Integer.parseInt(size);
+
+        Page<OrderResponse> listOrder = orderService.getListOrder(pageInt, sizeInt, statusOrder, startTime, endTime, userId)
+                .map(u -> {
+                    // get list product
+                    List<OrderProductResponse> orderProductResponses = orderService.getProductByOrderId(userId, u.getOrderId())
+                            .stream().map(OrderProductMapper::convertToOrderProductResponse).collect(Collectors.toList());
+
+                    orderProductResponses = getDetailProduct(orderProductResponses);
+
+                    // get total order
+                    TotalOrderResponse totalResponse = getTotalOrder(userId, u.getOrderId());
+
+                    return OrderMapper.convertOrderToOrderResponse(u, orderProductResponses, totalResponse);
+                });
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new PageResponse<Object>(
+                        StatusResponse.SUCCESSFUL
+                        , "Successfully"
+                        , listOrder.getContent()
+                        , pageInt +1
+                        , listOrder.getTotalPages()
+                        , listOrder.getTotalElements()
                 )
         );
     }

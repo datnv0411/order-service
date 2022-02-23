@@ -46,6 +46,15 @@ public class OrderResponse {
         this.totalResponse = totalResponse;
     }
 
+    public OrderResponse(long orderId, long userId, String statusOrder, String createTime, List<OrderProductResponse> productResponses, TotalOrderResponse totalResponse) {
+        this.orderId = orderId;
+        this.userId = userId;
+        this.statusOrder = statusOrder;
+        this.createTime = createTime;
+        this.productResponses = productResponses;
+        this.totalResponse = totalResponse;
+    }
+
     public long getOrderId() {
         return orderId;
     }
