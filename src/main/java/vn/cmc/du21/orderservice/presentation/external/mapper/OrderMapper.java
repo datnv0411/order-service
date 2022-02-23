@@ -6,6 +6,7 @@ import vn.cmc.du21.orderservice.persistence.internal.entity.Voucher;
 import vn.cmc.du21.orderservice.presentation.external.request.OrderRequest;
 import vn.cmc.du21.orderservice.presentation.external.response.*;
 import vn.cmc.du21.orderservice.presentation.external.response.DeliveryAddressResponse;
+import vn.cmc.du21.orderservice.presentation.internal.response.PaymentResponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +18,7 @@ public class OrderMapper {
 
     public static OrderResponse convertToOrderResponse(
             Order order , List<OrderProductResponse> productResponses
-            , OrderPaymentResponse paymentResponse, DeliveryAddressResponse addressResponse
+            , PaymentResponse paymentResponse, DeliveryAddressResponse addressResponse
             , TotalOrderResponse totalResponse){
 
         List<VoucherResponse> voucherResponses = new ArrayList<>();
@@ -39,16 +40,19 @@ public class OrderMapper {
             voucherResponses.add(voucher);
         }
 
+        String deliveryTime = order.getDeliveryTime() != null ? DateTimeUtil.timestampToString(order.getDeliveryTime()) : null;
+
         return new OrderResponse(order.getOrderId(), order.getUserId(), order.getStatusOrder()
                 , order.getNote(), DateTimeUtil.timestampToString(order.getCreateTime())
                 , DateTimeUtil.timestampToString(order.getHoldTime())
-                , DateTimeUtil.timestampToString(order.getDeliveryTime()), voucherResponses, productResponses
+                , deliveryTime , voucherResponses, productResponses
                 , paymentResponse, addressResponse, totalResponse);
     }
 
     public static Order convertOrderRequestToOrder(OrderRequest orderRequest) {
         Order order = new Order();
 
+        order.setUserId(orderRequest.getUserId());
         order.setPaymentId(orderRequest.getPaymentId());
         order.setHoldTime(DateTimeUtil.stringToTimeStamp(orderRequest.getHoldTime()));
         order.setNote(orderRequest.getNote());

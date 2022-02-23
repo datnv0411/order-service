@@ -1,6 +1,7 @@
 package vn.cmc.du21.orderservice.presentation.external.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.env.Environment;
@@ -47,21 +48,9 @@ public class CartController {
     VoucherService voucherService;
 
     @GetMapping(path = "/my-cart")
-    ResponseEntity<Object> cartDetail(HttpServletRequest request, HttpServletResponse response)
-    {
+    ResponseEntity<Object> cartDetail(HttpServletRequest request, HttpServletResponse response) throws Throwable {
         log.info("Mapped cartDetail method {{GET: /cart/my-cart}}");
-        UserResponse userLogin;
-        try {
-            userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    new StandardResponse<>(
-                            StatusResponse.UNAUTHORIZED,
-                            "Bad token!!!"
-                    )
-            );
-        }
-
+        UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
 
         CartResponse cartResponse = new CartResponse();
@@ -100,21 +89,10 @@ public class CartController {
 
     @PutMapping("/update")
     ResponseEntity<Object> updateCart(@RequestBody CartRequest cartRequest,
-                                      HttpServletRequest request, HttpServletResponse response) {
+                                      HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
         log.info("Mapped updateCart method {{GET: /cart/update}}");
-        UserResponse userLogin;
-        try {
-            userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    new StandardResponse<>(
-                            StatusResponse.UNAUTHORIZED,
-                            "Bad token!!!"
-                    )
-            );
-        }
-
+        UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
 
         // update cart - save database
@@ -172,24 +150,13 @@ public class CartController {
 
     @GetMapping("/add")
     ResponseEntity<Object> addProduct (@RequestBody CartProductRequest cartProductRequest
-                                        , HttpServletRequest request, HttpServletResponse response) {
+                                        , HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
         log.info("Mapped addProduct method {{GET: /add}}");
 
         if (cartProductRequest.getQuantity() == 0) cartProductRequest.setQuantity(1);
 
-        UserResponse userLogin;
-        try {
-            userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    new StandardResponse<>(
-                            StatusResponse.UNAUTHORIZED,
-                            "Bad token!!!"
-                    )
-            );
-        }
-
+        UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
         
         //check cart exist
@@ -238,18 +205,7 @@ public class CartController {
                                         , HttpServletRequest request, HttpServletResponse response) throws Throwable{
 
         log.info("Mapped removeProduct method {{DELETE: /remove}}");
-        UserResponse userLogin;
-        try {
-            userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    new StandardResponse<>(
-                            StatusResponse.UNAUTHORIZED,
-                            "Bad token!!!"
-                    )
-            );
-        }
-
+        UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
 
         if(cartService.findCart(userId)==null){
@@ -275,20 +231,10 @@ public class CartController {
     }
 
     @DeleteMapping("/quick-remove")
-    ResponseEntity<Object> quickRemove(HttpServletRequest request, HttpServletResponse response){
+    ResponseEntity<Object> quickRemove(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
         log.info("Mapped removeProduct method {{DELETE: /quick-remove}}");
-        UserResponse userLogin;
-        try {
-            userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    new StandardResponse<>(
-                            StatusResponse.UNAUTHORIZED,
-                            "Bad token!!!"
-                    )
-            );
-        }
+        UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
 
         if(cartService.findCart(userId)==null){

@@ -21,4 +21,14 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long> {
             "where o.orderId = :orderId and userId = :userId"
             , nativeQuery = true)
     List<Voucher> findVoucherByOrderId(@Param(value = "userId") long userId, @Param(value = "orderId") long orderId);
+
+    @Query(value = "select * from voucher " +
+            "inner join voucheruser on voucher.voucherId = voucheruser.voucher_voucherId " +
+            "where voucher.startTime < now() and voucher.endTime > now() and quantity > 0 " +
+            "and userId = :userId and codeVoucher = :codeVoucher and applicableValue <= :totalPrice " +
+            "and usedTimes < timesOfUse "
+            , nativeQuery = true)
+    Optional<Voucher> findAvailableVoucher(@Param("codeVoucher") String codeVoucher,
+                                       @Param("totalPrice") long totalPrice,
+                                       @Param("userId") long userId);
 }

@@ -21,7 +21,17 @@ public class CartService {
 
     @Transactional
     public Cart getMyCart(long userId) {
-        return cartRepository.findByUserId(userId).orElse(null);
+        Optional<Cart> foundCart = cartRepository.findByUserId(userId);
+        if(foundCart.isPresent())
+        {
+            return foundCart.get();
+        }
+        else
+        {
+            Cart newCart = new Cart();
+            newCart.setUserId(userId);
+            return cartRepository.save(newCart);
+        }
     }
 
     @Transactional

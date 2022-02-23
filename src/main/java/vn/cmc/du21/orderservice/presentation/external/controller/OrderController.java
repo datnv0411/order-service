@@ -1,6 +1,7 @@
 package vn.cmc.du21.orderservice.presentation.external.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.env.Environment;
@@ -8,17 +9,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import vn.cmc.du21.orderservice.common.DateTimeUtil;
 import vn.cmc.du21.orderservice.common.JwtTokenProvider;
 import vn.cmc.du21.orderservice.common.restful.PageResponse;
 import vn.cmc.du21.orderservice.common.restful.StandardResponse;
 import vn.cmc.du21.orderservice.common.restful.StatusResponse;
-import vn.cmc.du21.orderservice.persistence.internal.entity.OrderProduct;
 import vn.cmc.du21.orderservice.presentation.external.mapper.*;
 import vn.cmc.du21.orderservice.presentation.external.request.OrderProductRequest;
 import vn.cmc.du21.orderservice.presentation.external.request.OrderRequest;
 import vn.cmc.du21.orderservice.presentation.external.response.*;
 import vn.cmc.du21.orderservice.presentation.internal.response.AddressResponse;
+import vn.cmc.du21.orderservice.presentation.internal.response.PaymentResponse;
 import vn.cmc.du21.orderservice.presentation.internal.response.ProductResponse;
 import vn.cmc.du21.orderservice.presentation.internal.response.UserResponse;
 import vn.cmc.du21.orderservice.service.OrderService;
@@ -46,18 +46,7 @@ public class OrderController {
 
         log.info("Mapped getDetailOrder method {{GET: /order/{orderId}}}");
 
-        UserResponse userLogin;
-        try {
-            userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    new StandardResponse<>(
-                            StatusResponse.UNAUTHORIZED,
-                            "Bad token!!!"
-                    )
-            );
-        }
-
+        UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
 
         // get detail address
@@ -73,14 +62,16 @@ public class OrderController {
         orderProductResponses = getDetailProduct(orderProductResponses);
 
         // get order payment
-        OrderPaymentResponse orderPaymentResponse = OrderPaymentMapper.convertToOrderPaymentResponse(orderService.getPaymentByOrderId(userId, orderId));
+        PaymentResponse orderPaymentResponse = new PaymentResponse(orderService.getOrderByOrderId(userId, orderId).getPaymentId());
 
         // get total order
         TotalOrderResponse totalResponse = getTotalOrder(userId, orderId);
 
         OrderResponse orderResponse = OrderMapper.convertToOrderResponse(
-                orderService.getOrderByOrderId(userId, orderId), orderProductResponses
-                , orderPaymentResponse, addressResponse
+                orderService.getOrderByOrderId(userId, orderId)
+                , orderProductResponses
+                , orderPaymentResponse
+                , addressResponse
                 , totalResponse
         );
 
@@ -100,18 +91,7 @@ public class OrderController {
 
         log.info("Mapped createOrder method {{PUT: /order/{orderId}}}");
 
-        UserResponse userLogin;
-        try {
-            userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    new StandardResponse<>(
-                            StatusResponse.UNAUTHORIZED,
-                            "Bad token!!!"
-                    )
-            );
-        }
-
+        UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
 
         // get detail address
@@ -127,7 +107,7 @@ public class OrderController {
         orderProductResponses = getDetailProduct(orderProductResponses);
 
         // get order payment
-        OrderPaymentResponse orderPaymentResponse = OrderPaymentMapper.convertToOrderPaymentResponse(orderService.getPaymentByOrderId(userId, orderId));
+        PaymentResponse orderPaymentResponse = new PaymentResponse();
 
         // get total order
         TotalOrderResponse totalResponse = getTotalOrder(userId, orderId);
@@ -153,18 +133,7 @@ public class OrderController {
 
         log.info("Mapped createOrder method {{POST: /order/{orderId}}}");
 
-        UserResponse userLogin;
-        try {
-            userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    new StandardResponse<>(
-                            StatusResponse.UNAUTHORIZED,
-                            "Bad token!!!"
-                    )
-            );
-        }
-
+        UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
         orderRequest.setUserId(userId);
 
@@ -220,22 +189,11 @@ public class OrderController {
                                         , @RequestParam(value = "endTime", required = false) String endTime
                                         , @RequestParam(value = "page",required = false) String page
                                         , @RequestParam(value = "size",required = false) String size
-                                        ,  HttpServletRequest request, HttpServletResponse response) {
+                                        ,  HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
         log.info("Mapped getListOrder method {{GET: /order}}");
 
-        UserResponse userLogin;
-        try {
-            userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    new StandardResponse<>(
-                            StatusResponse.UNAUTHORIZED,
-                            "Bad token!!!"
-                    )
-            );
-        }
-
+        UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
 
         if (page==null || !page.chars().allMatch(Character::isDigit) || page.equals("")) page="1";

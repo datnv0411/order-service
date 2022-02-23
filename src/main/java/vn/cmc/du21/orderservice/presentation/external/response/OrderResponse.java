@@ -1,6 +1,7 @@
 package vn.cmc.du21.orderservice.presentation.external.response;
 
-import java.sql.Timestamp;
+import vn.cmc.du21.orderservice.presentation.internal.response.PaymentResponse;
+
 import java.util.List;
 
 public class OrderResponse {
@@ -20,7 +21,7 @@ public class OrderResponse {
     private List<OrderProductResponse> productResponses;
 
     // payment response
-    private OrderPaymentResponse paymentResponse;
+    private PaymentResponse paymentResponse;
 
     // address response
     private DeliveryAddressResponse addressResponse;
@@ -31,7 +32,7 @@ public class OrderResponse {
     public OrderResponse() {
     }
 
-    public OrderResponse(long orderId, long userId, String statusOrder, String note, String createTime, String holdTime, String deliveryTime, List<VoucherResponse> voucherResponses, List<OrderProductResponse> productResponses, OrderPaymentResponse paymentResponse, DeliveryAddressResponse addressResponse, TotalOrderResponse totalResponse) {
+    public OrderResponse(long orderId, long userId, String statusOrder, String note, String createTime, String holdTime, String deliveryTime, List<VoucherResponse> voucherResponses, List<OrderProductResponse> productResponses, PaymentResponse paymentResponse, DeliveryAddressResponse addressResponse, TotalOrderResponse totalResponse) {
         this.orderId = orderId;
         this.userId = userId;
         this.statusOrder = statusOrder;
@@ -127,11 +128,11 @@ public class OrderResponse {
         this.productResponses = productResponses;
     }
 
-    public OrderPaymentResponse getPaymentResponse() {
+    public PaymentResponse getPaymentResponse() {
         return paymentResponse;
     }
 
-    public void setPaymentResponse(OrderPaymentResponse paymentResponse) {
+    public void setPaymentResponse(PaymentResponse paymentResponse) {
         this.paymentResponse = paymentResponse;
     }
 
