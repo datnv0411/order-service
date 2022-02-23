@@ -29,11 +29,11 @@ public class Voucher {
     public Voucher() {
     }
 
-    public Voucher(long voucherId, String codeVoucher, Timestamp startTime, Timestamp emdTime, int timesOfUse, int quantity, String image, String title, int percentValue, int upToValue, int applicableValue, List<Order> orders) {
+    public Voucher(long voucherId, String codeVoucher, Timestamp startTime, Timestamp endTime, int timesOfUse, int quantity, String image, String title, int percentValue, int upToValue, int applicableValue, List<Order> orders) {
         this.voucherId = voucherId;
         this.codeVoucher = codeVoucher;
         this.startTime = startTime;
-        this.endTime = emdTime;
+        this.endTime = endTime;
         this.timesOfUse = timesOfUse;
         this.quantity = quantity;
         this.image = image;
