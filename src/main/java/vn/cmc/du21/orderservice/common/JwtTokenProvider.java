@@ -1,6 +1,7 @@
 package vn.cmc.du21.orderservice.common;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.web.client.RestTemplate;
 import vn.cmc.du21.orderservice.presentation.internal.response.UserResponse;

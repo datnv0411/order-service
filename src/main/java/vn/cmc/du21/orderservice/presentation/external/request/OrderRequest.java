@@ -1,8 +1,5 @@
 package vn.cmc.du21.orderservice.presentation.external.request;
 
-import vn.cmc.du21.orderservice.presentation.external.response.TotalOrderResponse;
-import vn.cmc.du21.orderservice.presentation.internal.request.AddressRequest;
-
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -12,21 +9,21 @@ public class OrderRequest {
     private long paymentId;
     private String statusOrder;
     private String note;
-    private Timestamp createTime;
-    private Timestamp holdTime;
-    private Timestamp deliveryTime;
+    private String createTime;
+    private String holdTime;
+    private String deliveryTime;
 
     // voucher response
     private List<VoucherRequest> voucherRequests;
 
     // product response
-    private List<OrderProductRequest> productRequests;
+    private List<OrderProductRequest> orderProductRequests;
 
 
     public OrderRequest() {
     }
 
-    public OrderRequest(long userId, long addressId, long paymentId, String statusOrder, String note, Timestamp createTime, Timestamp holdTime, Timestamp deliveryTime, List<VoucherRequest> voucherRequests, List<OrderProductRequest> productRequests) {
+    public OrderRequest(long userId, long addressId, long paymentId, String statusOrder, String note, String createTime, String holdTime, String deliveryTime, List<VoucherRequest> voucherRequests, List<OrderProductRequest> orderProductRequests) {
         this.userId = userId;
         this.addressId = addressId;
         this.paymentId = paymentId;
@@ -36,7 +33,7 @@ public class OrderRequest {
         this.holdTime = holdTime;
         this.deliveryTime = deliveryTime;
         this.voucherRequests = voucherRequests;
-        this.productRequests = productRequests;
+        this.orderProductRequests = orderProductRequests;
     }
 
     public long getUserId() {
@@ -79,27 +76,27 @@ public class OrderRequest {
         this.note = note;
     }
 
-    public Timestamp getCreateTime() {
+    public String getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Timestamp createTime) {
+    public void setCreateTime(String createTime) {
         this.createTime = createTime;
     }
 
-    public Timestamp getHoldTime() {
+    public String getHoldTime() {
         return holdTime;
     }
 
-    public void setHoldTime(Timestamp holdTime) {
+    public void setHoldTime(String holdTime) {
         this.holdTime = holdTime;
     }
 
-    public Timestamp getDeliveryTime() {
+    public String getDeliveryTime() {
         return deliveryTime;
     }
 
-    public void setDeliveryTime(Timestamp deliveryTime) {
+    public void setDeliveryTime(String deliveryTime) {
         this.deliveryTime = deliveryTime;
     }
 
@@ -111,11 +108,11 @@ public class OrderRequest {
         this.voucherRequests = voucherRequests;
     }
 
-    public List<OrderProductRequest> getProductRequests() {
-        return productRequests;
+    public List<OrderProductRequest> getOrderProductRequests() {
+        return orderProductRequests;
     }
 
-    public void setProductRequests(List<OrderProductRequest> productRequests) {
-        this.productRequests = productRequests;
+    public void setOrderProductRequests(List<OrderProductRequest> orderProductRequests) {
+        this.orderProductRequests = orderProductRequests;
     }
 }

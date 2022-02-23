@@ -10,6 +10,8 @@ import vn.cmc.du21.orderservice.persistence.internal.repository.VoucherRepositor
 import vn.cmc.du21.orderservice.presentation.external.response.DeliveryAddressResponse;
 
 import javax.transaction.Transactional;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,8 +22,6 @@ public class OrderService {
     OrderRepository orderRepository;
     @Autowired
     OrderProductRepository orderProductRepository;
-    /*@Autowired
-    OrderPayment orderPayment;*/
     @Autowired
     VoucherRepository voucherRepository;
     @Autowired
@@ -122,19 +122,28 @@ public class OrderService {
     public Order createOrder(Order order, DeliveryAddress deliveryAddress){
 
         // order
+        order.setCreateTime(Timestamp.valueOf(LocalDateTime.now()));
+        order.setStatusOrder("Chờ thanh toán");
 
         // list products + size + quantity
-
-        // orderaddress
+        for(OrderProduct item : order.getOrderProducts())
+        {
+            item.setOrder(order);
+        }
+        // order address
         order.setDeliveryAddress(deliveryAddress);
-        // ordervoucher
+        // order voucher
         List<Voucher> vouchers = new ArrayList<>();
         for (Voucher item : order.getVouchers()){
             Voucher voucher = voucherRepository.findByCodeVoucher(item.getCodeVoucher()).orElse(null);
+            if(voucher!=null)
+            {
+                vouchers.add(voucher);
+            }
         }
-        // orderpayment
-        return null;
+        order.setVouchers(vouchers);
 
+        return orderRepository.save(order);
     }
 
     public DeliveryAddress getDeliveryAddressByOrderId(long deliveryAddressId) {
