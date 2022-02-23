@@ -8,7 +8,6 @@ import vn.cmc.du21.orderservice.persistence.internal.entity.OrderProduct;
 import vn.cmc.du21.orderservice.persistence.internal.entity.OrderProductId;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface OrderProductRepository extends JpaRepository<OrderProduct, OrderProductId> {

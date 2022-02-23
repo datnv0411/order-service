@@ -2,7 +2,6 @@ package vn.cmc.du21.orderservice.persistence.internal.entity;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.util.Collection;
 import java.util.List;
 
 @Entity

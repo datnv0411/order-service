@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(path = "/api/v1.0")
 public class OrderController {
+    private static final String BAD_TOKEN = "Bad token !!!";
     @Autowired
     private Environment env;
     @Autowired
@@ -93,21 +94,6 @@ public class OrderController {
         );
     }
 
-    ResponseEntity<Object> checkToken(HttpServletRequest request, HttpServletResponse response) {
-        UserResponse userLogin;
-        try {
-            userLogin = JwtTokenProvider.getInfoUserFromToken(request);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    new StandardResponse<>(
-                            StatusResponse.UNAUTHORIZED,
-                            "Bad token!!!"
-                    )
-            );
-
-        }
-    }
-
     // update status - cancel
     @PutMapping("/order/cancel/{orderId}")
     ResponseEntity<Object> updateStatusOrder(@PathVariable(name = "orderId") long orderId,
@@ -122,36 +108,14 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     new StandardResponse<>(
                             StatusResponse.UNAUTHORIZED,
-                            "Bad token!!!"
+                            BAD_TOKEN
                     )
             );
         }
 
         long userId = userLogin.getUserId();
 
-        // get detail address
-        DeliveryAddressResponse addressResponse = DeliveryAddressMapper.convertDeliveryAddressToDeliveryAddressResponse(
-                orderService.getDeliveryAddressByOrderId(
-                        orderService.getOrderByOrderId(userId, orderId).getDeliveryAddress().getDeliveryAddressId()
-                ));
-
-        // get list product
-        List<OrderProductResponse> orderProductResponses = orderService.getProductByOrderId(userId, orderId)
-                .stream().map(OrderProductMapper::convertToOrderProductResponse).collect(Collectors.toList());
-
-        orderProductResponses = getDetailProduct(orderProductResponses);
-
-        // get order payment
-        OrderPaymentResponse orderPaymentResponse = OrderPaymentMapper.convertToOrderPaymentResponse(orderService.getPaymentByOrderId(userId, orderId));
-
-        // get total order
-        TotalOrderResponse totalResponse = getTotalOrder(userId, orderId);
-
-        OrderResponse orderResponse = OrderMapper.convertToOrderResponse(
-                orderService.updateOrder(orderId, userId), orderProductResponses
-                , orderPaymentResponse, addressResponse
-                , totalResponse
-        );
+        orderService.updateOrder(orderId, userId);
 
         return ResponseEntity.status(HttpStatus.OK).body(
                 new StandardResponse<>(
@@ -175,7 +139,7 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     new StandardResponse<>(
                             StatusResponse.UNAUTHORIZED,
-                            "Bad token!!!"
+                            BAD_TOKEN
                     )
             );
         }
@@ -203,15 +167,15 @@ public class OrderController {
                     item.getProductId();
 
             restTemplate = new RestTemplate();
-            HttpEntity<StandardResponse<ProductResponse>> requestItem = new HttpEntity<>(new StandardResponse<ProductResponse>());
+            HttpEntity<StandardResponse<ProductResponse>> requestItem = new HttpEntity<>(new StandardResponse<>());
             ResponseEntity<StandardResponse<ProductResponse>> responseItem = restTemplate
                     .exchange(uri, HttpMethod.GET, requestItem, new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {
                     });
 
-            ProductResponse productResponse = responseItem.getBody().getData();
+                ProductResponse productResponse = responseItem.getBody().getData();
 
-            item.setPrice(item.getPriceByProductIdAndSizeId(productResponse));
-            item.setPriceSale(item.getPriceSaleByProductIdAndSizeId(productResponse));
+                item.setPrice(item.getPriceByProductIdAndSizeId(productResponse));
+                item.setPriceSale(item.getPriceSaleByProductIdAndSizeId(productResponse));
         }
 
         //create order + delivery address
@@ -246,7 +210,7 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     new StandardResponse<>(
                             StatusResponse.UNAUTHORIZED,
-                            "Bad token!!!"
+                            BAD_TOKEN
                     )
             );
         }
@@ -290,7 +254,7 @@ public class OrderController {
 
     // get detail address
     public DeliveryAddressResponse getDetailAddress(long addressId,
-                                                    HttpServletRequest request, HttpServletResponse response){
+                                                    HttpServletRequest request){
 
         HttpHeaders httpHeaders = new HttpHeaders();
         RestTemplate restTemplate = new RestTemplate();
@@ -298,31 +262,29 @@ public class OrderController {
         httpHeaders.setBearerAuth(request.getHeader("Authorization").split(" ")[1]);
         String uri = env.getProperty("path.user-service")+"/api/v1.0/address/" + addressId + "";
 
-        HttpEntity<StandardResponse<DeliveryAddressResponse>> entity = new HttpEntity<>(new StandardResponse<DeliveryAddressResponse>(), httpHeaders);
+        HttpEntity<StandardResponse<DeliveryAddressResponse>> entity = new HttpEntity<>(new StandardResponse<>(), httpHeaders);
         ResponseEntity<StandardResponse<DeliveryAddressResponse>> res = restTemplate
                 .exchange(uri, HttpMethod.GET, entity, new ParameterizedTypeReference<StandardResponse<DeliveryAddressResponse>>() {});
 
-        DeliveryAddressResponse addressResponse = res.getBody().getData();
-
-        return addressResponse;
+        return res.getBody().getData();
     }
 
     // get detail product
     public List<OrderProductResponse> getDetailProduct(List<OrderProductResponse> orderProductResponses){
 
         for (OrderProductResponse item : orderProductResponses){
-            String uri = env.getProperty("path.inventory-service") + "/api/v1.0/product/get-detail-product/" +
-                    item.getProductResponse().getProductId();
+                String uri = env.getProperty("path.inventory-service") + "/api/v1.0/product/get-detail-product/" +
+                        item.getProductResponse().getProductId();
 
-            RestTemplate restTemplate = new RestTemplate();
-            HttpEntity<StandardResponse<ProductResponse>> requestProduct = new HttpEntity<>(new StandardResponse<ProductResponse>());
-            ResponseEntity<StandardResponse<ProductResponse>> responseProduct = restTemplate
-                    .exchange(uri, HttpMethod.GET, requestProduct, new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {
-                    });
+                RestTemplate restTemplate = new RestTemplate();
+                HttpEntity<StandardResponse<ProductResponse>> requestProduct = new HttpEntity<>(new StandardResponse<>());
+                ResponseEntity<StandardResponse<ProductResponse>> responseProduct = restTemplate
+                        .exchange(uri, HttpMethod.GET, requestProduct, new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {
+                        });
 
-            StandardResponse<ProductResponse> productResponse = responseProduct.getBody();
+                StandardResponse<ProductResponse> productResponse = responseProduct.getBody();
 
-            item.setProductResponse(productResponse.getData());
+                item.setProductResponse(productResponse.getData());
         }
 
         return orderProductResponses;

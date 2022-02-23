@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import vn.cmc.du21.orderservice.common.APIGetDetailProduct;
 import vn.cmc.du21.orderservice.common.restful.StandardResponse;
 import vn.cmc.du21.orderservice.common.restful.StatusResponse;
 import vn.cmc.du21.orderservice.persistence.internal.entity.CartProduct;
@@ -63,7 +62,7 @@ public class CartController {
                     item.getProductResponse().getProductId();
 
             RestTemplate restTemplate = new RestTemplate();
-            HttpEntity<StandardResponse<ProductResponse>> request = new HttpEntity<>(new StandardResponse<ProductResponse>());
+            HttpEntity<StandardResponse<ProductResponse>> request = new HttpEntity<>(new StandardResponse<>());
             ResponseEntity<StandardResponse<ProductResponse>> response = restTemplate
                     .exchange(uri, HttpMethod.GET, request, new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {
                     });
@@ -109,7 +108,7 @@ public class CartController {
                     item.getProductResponse().getProductId();
 
             RestTemplate restTemplate = new RestTemplate();
-            HttpEntity<StandardResponse<ProductResponse>> request = new HttpEntity<>(new StandardResponse<ProductResponse>());
+            HttpEntity<StandardResponse<ProductResponse>> request = new HttpEntity<>(new StandardResponse<>());
             ResponseEntity<StandardResponse<ProductResponse>> response = restTemplate
                     .exchange(uri, HttpMethod.GET, request, new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {
                     });
@@ -164,8 +163,17 @@ public class CartController {
             cartService.createCart(userId);
         }
         try{
+            final String uri = "http://192.168.66.125:8200/api/v1.0/product/get-detail-product/" + cartProductRequest.getProductId();
+
+            RestTemplate restTemplate = new RestTemplate();
+            HttpEntity<StandardResponse<ProductResponse>> requestProduct = new HttpEntity<>(new StandardResponse<>());
+            ResponseEntity<StandardResponse<ProductResponse>> responseProduct = restTemplate
+                    .exchange(uri, HttpMethod.GET, requestProduct, new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {
+                    });
+
             StandardResponse<ProductResponse> productResponse =
-                    APIGetDetailProduct.getDetailProduct(request, cartProductRequest.getProductId());
+                    responseProduct.getBody();
+
             List<SizeResponse> listSize = productResponse.getData().getSizeResponseList();
             if(cartProductRequest.getSizeId() == 0){
                 for (SizeResponse item : listSize){
@@ -187,8 +195,16 @@ public class CartController {
         List<CartProductResponse> listResponse = new ArrayList<>();
         List<CartProduct> list = cartService.findAllByCartId(cartProductRequest.getCartId());
         for (CartProduct item : list){
-            ProductResponse productResponse =
-                    APIGetDetailProduct.getDetailProduct(request, item.getCartProductId().getProductId()).getData();
+            final String uri = "http://192.168.66.125:8200/api/v1.0/product/get-detail-product/" + item.getCartProductId().getProductId();
+
+            RestTemplate restTemplate = new RestTemplate();
+            HttpEntity<StandardResponse<ProductResponse>> requestProduct = new HttpEntity<>(new StandardResponse<>());
+            ResponseEntity<StandardResponse<ProductResponse>> responseProduct = restTemplate
+                    .exchange(uri, HttpMethod.GET, requestProduct, new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {
+                    });
+
+            ProductResponse productResponse = responseProduct.getBody().getData();
+
             listResponse.add(CartProductMapper.convertToCartProductResponse(item,productResponse));
         }
         return ResponseEntity.status(HttpStatus.OK).body(
@@ -227,8 +243,16 @@ public class CartController {
         List<CartProductResponse> listResponse = new ArrayList<>();
         List<CartProduct> list = cartService.findAllByCartId(cartService.findCart(userId).getCartId());
         for (CartProduct item : list){
-            ProductResponse productResponse =
-                    APIGetDetailProduct.getDetailProduct(request, item.getCartProductId().getProductId()).getData();
+            final String uri = "http://192.168.66.125:8200/api/v1.0/product/get-detail-product/" + item.getCartProductId().getProductId();
+
+            RestTemplate restTemplate = new RestTemplate();
+            HttpEntity<StandardResponse<ProductResponse>> requestProduct = new HttpEntity<>(new StandardResponse<>());
+            ResponseEntity<StandardResponse<ProductResponse>> responseProduct = restTemplate
+                    .exchange(uri, HttpMethod.GET, requestProduct, new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {
+                    });
+
+            ProductResponse productResponse = responseProduct.getBody().getData();
+
             listResponse.add(CartProductMapper.convertToCartProductResponse(item,productResponse));
         }
         return ResponseEntity.status(HttpStatus.OK).body(
@@ -254,7 +278,7 @@ public class CartController {
 //            );
 //        }
 //        long userId = userLogin.getUserId();
-        long userId = 1;
+
         if(cartService.findCart(userId)==null){
             cartService.createCart(userId);
         }

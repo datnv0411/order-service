@@ -48,7 +48,7 @@ public class VoucherController {
     }
 
     @PostMapping("/save-voucher/{voucherId}")
-    ResponseEntity<Object> SaveVocher(HttpServletRequest request, HttpServletResponse response,
+    ResponseEntity<Object> SaveVoucher(HttpServletRequest request, HttpServletResponse response,
                                         @PathVariable(name = "voucherId") long voucherId) throws Throwable {
 
         log.info("Mapped save voucher method {{POST: /voucher/save-voucher/{voucherId}");
