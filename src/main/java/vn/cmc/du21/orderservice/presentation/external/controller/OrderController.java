@@ -13,15 +13,12 @@ import vn.cmc.du21.orderservice.common.JwtTokenProvider;
 import vn.cmc.du21.orderservice.common.restful.PageResponse;
 import vn.cmc.du21.orderservice.common.restful.StandardResponse;
 import vn.cmc.du21.orderservice.common.restful.StatusResponse;
-import vn.cmc.du21.orderservice.presentation.external.mapper.DeliveryAddressMapper;
-import vn.cmc.du21.orderservice.presentation.external.mapper.OrderMapper;
-import vn.cmc.du21.orderservice.presentation.external.mapper.OrderPaymentMapper;
-import vn.cmc.du21.orderservice.presentation.external.mapper.OrderProductMapper;
-import vn.cmc.du21.orderservice.presentation.external.response.OrderPaymentResponse;
-import vn.cmc.du21.orderservice.presentation.external.response.OrderProductResponse;
-import vn.cmc.du21.orderservice.presentation.external.response.OrderResponse;
-import vn.cmc.du21.orderservice.presentation.external.response.TotalOrderResponse;
-import vn.cmc.du21.orderservice.presentation.external.response.DeliveryAddressResponse;
+import vn.cmc.du21.orderservice.persistence.internal.entity.OrderProduct;
+import vn.cmc.du21.orderservice.presentation.external.mapper.*;
+import vn.cmc.du21.orderservice.presentation.external.request.OrderProductRequest;
+import vn.cmc.du21.orderservice.presentation.external.request.OrderRequest;
+import vn.cmc.du21.orderservice.presentation.external.response.*;
+import vn.cmc.du21.orderservice.presentation.internal.response.AddressResponse;
 import vn.cmc.du21.orderservice.presentation.internal.response.ProductResponse;
 import vn.cmc.du21.orderservice.presentation.internal.response.UserResponse;
 import vn.cmc.du21.orderservice.service.OrderService;
@@ -33,70 +30,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@RestController
 @Slf4j
+@RestController
 @RequestMapping(path = "/api/v1.0")
 public class OrderController {
     @Autowired
     private Environment env;
     @Autowired
     OrderService orderService;
-
-    // get detail address
-    /*public DeliveryAddressResponse getDetailAddress(long addressId,
-                                                    HttpServletRequest request, HttpServletResponse response){
-
-        HttpHeaders httpHeaders = new HttpHeaders();
-        RestTemplate restTemplate = new RestTemplate();
-        httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-        httpHeaders.setBearerAuth(request.getHeader("Authorization").split(" ")[1]);
-        String uri = env.getProperty("path.user-service")+"/api/v1.0/address/" + addressId + "";
-
-        HttpEntity<StandardResponse<DeliveryAddressResponse>> entity = new HttpEntity<>(new StandardResponse<DeliveryAddressResponse>(), httpHeaders);
-        ResponseEntity<StandardResponse<DeliveryAddressResponse>> res = restTemplate
-                .exchange(uri, HttpMethod.GET, entity, new ParameterizedTypeReference<StandardResponse<DeliveryAddressResponse>>() {});
-
-        DeliveryAddressResponse addressResponse = res.getBody().getData();
-
-        return addressResponse;
-    }*/
-
-    // get detail product
-    public List<OrderProductResponse> getDetailProduct(List<OrderProductResponse> orderProductResponses){
-
-        for (OrderProductResponse item : orderProductResponses){
-            String uri = env.getProperty("path.inventory-service") + "/api/v1.0/product/get-detail-product/" +
-                    item.getProductResponse().getProductId();
-
-            RestTemplate restTemplate = new RestTemplate();
-            HttpEntity<StandardResponse<ProductResponse>> requestProduct = new HttpEntity<>(new StandardResponse<ProductResponse>());
-            ResponseEntity<StandardResponse<ProductResponse>> responseProduct = restTemplate
-                    .exchange(uri, HttpMethod.GET, requestProduct, new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {
-                    });
-
-            StandardResponse<ProductResponse> productResponse = responseProduct.getBody();
-
-            item.setProductResponse(productResponse.getData());
-        }
-
-        return orderProductResponses;
-    }
-
-    // get total order
-    public TotalOrderResponse getTotalOrder(long userId, long orderId){
-        TotalOrderResponse totalResponse = new TotalOrderResponse();
-
-        totalResponse.setTotalPrice(orderService.totalPrice(orderId));
-        totalResponse.setTotalDiscount(orderService.totalDiscount(orderId));
-        totalResponse.setShippingFee(orderService.shippingFee(orderId));
-        totalResponse.setTotalBeforeVAT(orderService.totalBeforeVAT(orderId));
-        totalResponse.setTotalVAT(orderService.totalVAT(orderId));
-        totalResponse.setTotalAfterVAT(orderService.totalAfterVAT(orderId));
-        totalResponse.setTotalVoucherDiscount(orderService.totalVoucherDiscount(userId, orderId));
-        totalResponse.setTotalOrder(orderService.totalOrder(userId, orderId));
-
-        return totalResponse;
-    }
 
     //get detail order
     @GetMapping("/order/{orderId}")
@@ -107,7 +48,7 @@ public class OrderController {
 
         UserResponse userLogin;
         try {
-            userLogin = JwtTokenProvider.getInfoUserFromToken(request);
+            userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     new StandardResponse<>(
@@ -120,7 +61,7 @@ public class OrderController {
         long userId = userLogin.getUserId();
 
         // get detail address
-        DeliveryAddressResponse addressResponse = DeliveryAddressMapper.convertAddressRequestToAddress(
+        DeliveryAddressResponse addressResponse = DeliveryAddressMapper.convertDeliveryAddressToDeliveryAddressResponse(
                 orderService.getDeliveryAddressByOrderId(
                     orderService.getOrderByOrderId(userId, orderId).getDeliveryAddress().getDeliveryAddressId()
         ));
@@ -176,7 +117,7 @@ public class OrderController {
 
         UserResponse userLogin;
         try {
-            userLogin = JwtTokenProvider.getInfoUserFromToken(request);
+            userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     new StandardResponse<>(
@@ -189,7 +130,7 @@ public class OrderController {
         long userId = userLogin.getUserId();
 
         // get detail address
-        DeliveryAddressResponse addressResponse = DeliveryAddressMapper.convertAddressRequestToAddress(
+        DeliveryAddressResponse addressResponse = DeliveryAddressMapper.convertDeliveryAddressToDeliveryAddressResponse(
                 orderService.getDeliveryAddressByOrderId(
                         orderService.getOrderByOrderId(userId, orderId).getDeliveryAddress().getDeliveryAddressId()
                 ));
@@ -222,14 +163,14 @@ public class OrderController {
 
     // create order
     @PostMapping("/order/create")
-    ResponseEntity<Object>createOrder(
+    ResponseEntity<Object>createOrder(@RequestBody OrderRequest orderRequest,
                                       HttpServletRequest request, HttpServletResponse response) throws Throwable{
 
         log.info("Mapped createOrder method {{POST: /order/{orderId}}}");
 
         UserResponse userLogin;
         try {
-            userLogin = JwtTokenProvider.getInfoUserFromToken(request);
+            userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     new StandardResponse<>(
@@ -240,10 +181,44 @@ public class OrderController {
         }
 
         long userId = userLogin.getUserId();
+        orderRequest.setUserId(userId);
 
         // get detail address by addressId - user-service,
+        HttpHeaders httpHeaders = new HttpHeaders();
+        RestTemplate restTemplate = new RestTemplate();
+        httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        httpHeaders.setBearerAuth(request.getHeader("Authorization").split(" ")[1]);
+        String uri = env.getProperty("path.user-service")+"/api/v1.0/address/" + orderRequest.getAddressId() + "";
 
-        //get order-service truyền
+        HttpEntity<StandardResponse<AddressResponse>> entity = new HttpEntity<>(new StandardResponse<AddressResponse>(), httpHeaders);
+        ResponseEntity<StandardResponse<AddressResponse>> res = restTemplate
+                .exchange(uri, HttpMethod.GET, entity, new ParameterizedTypeReference<StandardResponse<AddressResponse>>() {});
+
+        AddressResponse addressResponse = res.getBody().getData();
+
+        // get price + price sale product
+
+        for (OrderProductRequest item : orderRequest.getOrderProductRequests()) {
+             uri = env.getProperty("path.inventory-service") + "/api/v1.0/product/get-detail-product/" +
+                    item.getProductId();
+
+            restTemplate = new RestTemplate();
+            HttpEntity<StandardResponse<ProductResponse>> requestItem = new HttpEntity<>(new StandardResponse<ProductResponse>());
+            ResponseEntity<StandardResponse<ProductResponse>> responseItem = restTemplate
+                    .exchange(uri, HttpMethod.GET, requestItem, new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {
+                    });
+
+            ProductResponse productResponse = responseItem.getBody().getData();
+
+            item.setPrice(item.getPriceByProductIdAndSizeId(productResponse));
+            item.setPriceSale(item.getPriceSaleByProductIdAndSizeId(productResponse));
+        }
+
+        //create order + delivery address
+        orderService.createOrder(
+                OrderMapper.convertOrderRequestToOrder(orderRequest),
+                DeliveryAddressMapper.convertAddressResponseToDeliveryAddress(addressResponse)
+        );
 
         return ResponseEntity.status(HttpStatus.OK).body(
                 new StandardResponse<>(
@@ -266,7 +241,7 @@ public class OrderController {
 
         UserResponse userLogin;
         try {
-            userLogin = JwtTokenProvider.getInfoUserFromToken(request);
+            userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     new StandardResponse<>(
@@ -277,7 +252,6 @@ public class OrderController {
         }
 
         long userId = userLogin.getUserId();
-        //long userId = 1;
 
         if (page==null || !page.chars().allMatch(Character::isDigit) || page.equals("")) page="1";
         if (size==null || !size.chars().allMatch(Character::isDigit) || size.equals("")) size="5";
@@ -312,5 +286,61 @@ public class OrderController {
                         , listOrder.getTotalElements()
                 )
         );
+    }
+
+    // get detail address
+    public DeliveryAddressResponse getDetailAddress(long addressId,
+                                                    HttpServletRequest request, HttpServletResponse response){
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        RestTemplate restTemplate = new RestTemplate();
+        httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        httpHeaders.setBearerAuth(request.getHeader("Authorization").split(" ")[1]);
+        String uri = env.getProperty("path.user-service")+"/api/v1.0/address/" + addressId + "";
+
+        HttpEntity<StandardResponse<DeliveryAddressResponse>> entity = new HttpEntity<>(new StandardResponse<DeliveryAddressResponse>(), httpHeaders);
+        ResponseEntity<StandardResponse<DeliveryAddressResponse>> res = restTemplate
+                .exchange(uri, HttpMethod.GET, entity, new ParameterizedTypeReference<StandardResponse<DeliveryAddressResponse>>() {});
+
+        DeliveryAddressResponse addressResponse = res.getBody().getData();
+
+        return addressResponse;
+    }
+
+    // get detail product
+    public List<OrderProductResponse> getDetailProduct(List<OrderProductResponse> orderProductResponses){
+
+        for (OrderProductResponse item : orderProductResponses){
+            String uri = env.getProperty("path.inventory-service") + "/api/v1.0/product/get-detail-product/" +
+                    item.getProductResponse().getProductId();
+
+            RestTemplate restTemplate = new RestTemplate();
+            HttpEntity<StandardResponse<ProductResponse>> requestProduct = new HttpEntity<>(new StandardResponse<ProductResponse>());
+            ResponseEntity<StandardResponse<ProductResponse>> responseProduct = restTemplate
+                    .exchange(uri, HttpMethod.GET, requestProduct, new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {
+                    });
+
+            StandardResponse<ProductResponse> productResponse = responseProduct.getBody();
+
+            item.setProductResponse(productResponse.getData());
+        }
+
+        return orderProductResponses;
+    }
+
+    // get total order
+    public TotalOrderResponse getTotalOrder(long userId, long orderId){
+        TotalOrderResponse totalResponse = new TotalOrderResponse();
+
+        totalResponse.setTotalPrice(orderService.totalPrice(orderId));
+        totalResponse.setTotalDiscount(orderService.totalDiscount(orderId));
+        totalResponse.setShippingFee(orderService.shippingFee(orderId));
+        totalResponse.setTotalBeforeVAT(orderService.totalBeforeVAT(orderId));
+        totalResponse.setTotalVAT(orderService.totalVAT(orderId));
+        totalResponse.setTotalAfterVAT(orderService.totalAfterVAT(orderId));
+        totalResponse.setTotalVoucherDiscount(orderService.totalVoucherDiscount(userId, orderId));
+        totalResponse.setTotalOrder(orderService.totalOrder(userId, orderId));
+
+        return totalResponse;
     }
 }

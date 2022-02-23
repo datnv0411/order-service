@@ -17,6 +17,11 @@ public class VoucherUser {
     public VoucherUser() {
     }
 
+    public VoucherUser(VoucherUserId voucherUserId, int usedTimes) {
+        this.voucherUserId = voucherUserId;
+        this.usedTimes = usedTimes;
+    }
+
     public VoucherUser(VoucherUserId voucherUserId, int usedTimes, Voucher voucher) {
         this.voucherUserId = voucherUserId;
         this.usedTimes = usedTimes;

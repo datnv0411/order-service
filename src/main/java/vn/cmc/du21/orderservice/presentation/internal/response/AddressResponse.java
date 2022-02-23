@@ -1,13 +1,8 @@
-package vn.cmc.du21.orderservice.persistence.internal.entity;
+package vn.cmc.du21.orderservice.presentation.internal.response;
 
-import javax.persistence.*;
-
-@Entity
-@Table(name = "deliveryaddress")
-public class DeliveryAddress {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long deliveryAddressId;
+public class AddressResponse {
+    private long addressId;
+    private boolean isDefault;
     private String typeAddress;
     private String fullName;
     private String cellphone;
@@ -16,11 +11,13 @@ public class DeliveryAddress {
     private String town;
     private String specificAddress;
 
-    public DeliveryAddress() {
+    public AddressResponse() {
     }
 
-    public DeliveryAddress(long addressId, String typeAddress, String fullName, String cellphone, String province, String district, String town, String specificAddress) {
-        this.deliveryAddressId = addressId;
+    public AddressResponse(long addressId, boolean isDefault, String typeAddress, String fullName
+            , String cellphone, String province, String district, String town, String specificAddress) {
+        this.addressId = addressId;
+        this.isDefault = isDefault;
         this.typeAddress = typeAddress;
         this.fullName = fullName;
         this.cellphone = cellphone;
@@ -30,12 +27,20 @@ public class DeliveryAddress {
         this.specificAddress = specificAddress;
     }
 
-    public long getDeliveryAddressId() {
-        return deliveryAddressId;
+    public long getAddressId() {
+        return addressId;
     }
 
-    public void setDeliveryAddressId(long deliveryAddressId) {
-        this.deliveryAddressId = deliveryAddressId;
+    public void setAddressId(long addressId) {
+        this.addressId = addressId;
+    }
+
+    public boolean isDefault() {
+        return isDefault;
+    }
+
+    public void setDefault(boolean aDefault) {
+        isDefault = aDefault;
     }
 
     public String getTypeAddress() {

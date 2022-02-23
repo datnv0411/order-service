@@ -1,7 +1,6 @@
 package vn.cmc.du21.orderservice.common;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.web.client.RestTemplate;
@@ -12,7 +11,6 @@ import java.time.temporal.ChronoUnit;
 
 @Slf4j
 public class JwtTokenProvider {
-    private static Environment env;
     private JwtTokenProvider() {
         throw new IllegalStateException("Utility class");
     }
@@ -24,7 +22,7 @@ public class JwtTokenProvider {
     private static final long JWT_AMOUNT_TO_ADD_TIME = 1;
     private static final ChronoUnit JWT_TIME_UNIT = ChronoUnit.DAYS;
 
-    public static UserResponse getInfoUserFromToken(HttpServletRequest request)
+    public static UserResponse getInfoUserFromToken(HttpServletRequest request, Environment env)
     {
         log.info("Mapped getInfoUserFromToken method");
         String[] arr = request.getHeader("Authorization").split(" ");

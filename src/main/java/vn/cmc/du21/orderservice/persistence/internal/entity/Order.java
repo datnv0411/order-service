@@ -13,6 +13,7 @@ public class Order {
     private long orderId;
 
     private long userId;
+    private long paymentId;
     private String statusOrder;
     private String note;
     private Timestamp createTime;
@@ -21,9 +22,6 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderProduct> orderProducts;
-
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<OrderPayment> orderPayments;
 
     @ManyToMany
     @JoinTable(name = "ordervoucher", joinColumns = @JoinColumn(name = "orderId"), inverseJoinColumns = @JoinColumn(name = "voucherId"))
@@ -36,16 +34,16 @@ public class Order {
     public Order() {
     }
 
-    public Order(long orderId, long userId, String statusOrder, String note, Timestamp createTime, Timestamp holdTime, Timestamp deliveryTime, List<OrderProduct> orderProducts, List<OrderPayment> orderPayments, List<Voucher> vouchers, DeliveryAddress deliveryAddress) {
+    public Order(long orderId, long userId, long paymentId, String statusOrder, String note, Timestamp createTime, Timestamp holdTime, Timestamp deliveryTime, List<OrderProduct> orderProducts, List<Voucher> vouchers, DeliveryAddress deliveryAddress) {
         this.orderId = orderId;
         this.userId = userId;
+        this.paymentId = paymentId;
         this.statusOrder = statusOrder;
         this.note = note;
         this.createTime = createTime;
         this.holdTime = holdTime;
         this.deliveryTime = deliveryTime;
         this.orderProducts = orderProducts;
-        this.orderPayments = orderPayments;
         this.vouchers = vouchers;
         this.deliveryAddress = deliveryAddress;
     }
@@ -64,6 +62,14 @@ public class Order {
 
     public void setUserId(long userId) {
         this.userId = userId;
+    }
+
+    public long getPaymentId() {
+        return paymentId;
+    }
+
+    public void setPaymentId(long paymentId) {
+        this.paymentId = paymentId;
     }
 
     public String getStatusOrder() {
@@ -112,14 +118,6 @@ public class Order {
 
     public void setOrderProducts(List<OrderProduct> orderProducts) {
         this.orderProducts = orderProducts;
-    }
-
-    public List<OrderPayment> getOrderPayments() {
-        return orderPayments;
-    }
-
-    public void setOrderPayments(List<OrderPayment> orderPayments) {
-        this.orderPayments = orderPayments;
     }
 
     public List<Voucher> getVouchers() {
