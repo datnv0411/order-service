@@ -47,11 +47,11 @@ public class VoucherController {
 
     }
 
-    @PostMapping("/save-voucher/{voucherId}")
+    @PostMapping("/save-voucher/{codeVoucher}")
     ResponseEntity<Object> SaveVocher(HttpServletRequest request, HttpServletResponse response,
-                                        @PathVariable(name = "voucherId") long voucherId) throws Throwable {
+                                        @PathVariable(name = "codeVoucher") String codeVoucher) throws Throwable {
 
-        log.info("Mapped save voucher method {{POST: /voucher/save-voucher/{voucherId}");
+        log.info("Mapped save voucher method {{POST: /voucher/save-voucher/{codeVoucher}");
 
         UserResponse userLogin;
         try {
@@ -67,7 +67,7 @@ public class VoucherController {
 
         long userId = userLogin.getUserId();
 
-        voucherService.SaveVoucher(userId, voucherId);
+        voucherService.SaveVoucher(userId, codeVoucher);
 
         return ResponseEntity.ok().body(
                 new StandardResponse<Object>(StatusResponse.SUCCESSFUL,

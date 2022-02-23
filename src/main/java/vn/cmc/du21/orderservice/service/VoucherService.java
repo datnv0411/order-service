@@ -25,7 +25,9 @@ public class VoucherService {
     VoucherRepository voucherRepository;
     @Autowired
     VoucherUserRepository voucherUserRepository;
-
+    public static Timestamp getTimeNow(){
+        return Timestamp.from(Instant.now());
+    }
     public List<Voucher> applyVoucher(List<Voucher> listVoucher, long totalPrice, long userId) {
         List<Voucher> newListVoucher = new ArrayList<>();
 
@@ -70,15 +72,16 @@ public class VoucherService {
     }
 
     @Transactional
-    public void SaveVoucher(long userId, long voucherId) throws Throwable{
-        if(voucherRepository.findById(voucherId).isPresent()){
+    public void SaveVoucher(long userId, String codeVoucher) throws Throwable{
+        Optional<Voucher> voucher =voucherRepository.findByCodeVoucher(codeVoucher);
+        if(voucher.isPresent()){
             VoucherUserId voucherUserId = new VoucherUserId();
-            voucherUserId.setVoucherId(voucherId);
+            voucherUserId.setVoucherId(voucher.get().getVoucherId());
             voucherUserId.setUserId(userId);
             VoucherUser voucherUser = new VoucherUser();
             voucherUser.setVoucherUserId(voucherUserId);
             voucherUser.setUsedTimes(0);
-            voucherUser.setVoucher(voucherRepository.findById(voucherId).get());
+            voucherUser.setVoucher(voucher.get());
             voucherUserRepository.save(voucherUser);
         }else {
             throw new RuntimeException("Not found");
@@ -95,10 +98,9 @@ public class VoucherService {
         VoucherResponse voucherResponse = new VoucherResponse();
         voucherResponse.setVoucherId(item.getVoucher().getVoucherId());
         voucherResponse.setCodeVoucher(item.getVoucher().getCodeVoucher());
-        //get current time
-        Timestamp ts = Timestamp.from(Instant.now());
+
         //compare startTime, endTime to current time, quantity > 0, time of use > usedTime
-        if(item.getVoucher().getStartTime().compareTo(ts)<0 && item.getVoucher().getEndTime().compareTo(ts)>0
+        if(item.getVoucher().getStartTime().compareTo(getTimeNow())<0 && item.getVoucher().getEndTime().compareTo(getTimeNow())>0
                 && item.getVoucher().getQuantity()>0 && item.getVoucher().getTimesOfUse() > item.getUsedTimes())
         {
             voucherResponse.setStartTime(DateTimeUtil.timestampToString(item.getVoucher().getStartTime()));
@@ -134,10 +136,9 @@ public class VoucherService {
             if(voucherUser.isPresent()){
                 continue;
             }else {
-                //get current time
-                Timestamp ts = Timestamp.from(Instant.now());
+
                 //compare startTime, endTime to current time, quantity > 0,
-                if(item.getStartTime().compareTo(ts)<0 && item.getEndTime().compareTo(ts)>0
+                if(item.getStartTime().compareTo(getTimeNow())<0 && item.getEndTime().compareTo(getTimeNow())>0
                         && item.getQuantity()>0 )
                 {
                     vouchers.add(item);
