@@ -14,8 +14,6 @@ import org.springframework.web.client.RestTemplate;
 import vn.cmc.du21.orderservice.common.JwtTokenProvider;
 import vn.cmc.du21.orderservice.common.restful.StandardResponse;
 import vn.cmc.du21.orderservice.common.restful.StatusResponse;
-import vn.cmc.du21.orderservice.persistence.internal.entity.CartProduct;
-import vn.cmc.du21.orderservice.persistence.internal.entity.CartProductId;
 import vn.cmc.du21.orderservice.presentation.external.mapper.CartProductMapper;
 import vn.cmc.du21.orderservice.presentation.external.mapper.VoucherMapper;
 import vn.cmc.du21.orderservice.presentation.external.request.CartProductRequest;
@@ -194,9 +192,8 @@ public class CartController {
         cartProductRequest.setCartId(cartService.findCart(userId).getCartId());
         cartService.addProduct(CartProductMapper.convertCartProductRequestToCartProduct(cartProductRequest,cartService.findCart(userId)));
 
-        List<CartProductResponse> listResponse = new ArrayList<>();
-        List<CartProduct> list = cartService.findAllByCartId(cartProductRequest.getCartId());
-        for (CartProduct item : list){
+        List<CartProductResponse> listResponse =  CartProductMapper.convertCartProductToCartProductResponse(cartService.findAllByCartId(cartProductRequest.getCartId()));
+        for (CartProductResponse item : list){
             final String uri = env.getProperty(PATH_INVENTORY_SERVICE) + GET_DETAIL_PRODUCT + item.getCartProductId().getProductId();
 
             RestTemplate restTemplate = new RestTemplate();
