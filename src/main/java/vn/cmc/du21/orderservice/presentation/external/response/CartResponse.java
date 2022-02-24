@@ -35,12 +35,17 @@ public class CartResponse {
     public TotalCartResponse getTotals() {
         TotalCartResponse totalResponse = new TotalCartResponse();
 
+        int totalProduct = 0;
+
         long totalPrice = 0;
         for(CartProductResponse item : items)
         {
+            totalProduct += item.getQuantity();
             totalPrice += item.getPriceWithoutSale();
         }
+        // tong tien phai tra (gia san pham chua sale), tong so san pham
         totalResponse.setTotalPrice(totalPrice);
+        totalResponse.setTotalProduct(totalProduct);
 
         long totalSale = 0; // tong tien sale (cua tung san pham)
         long totalSalePrice = 0;
@@ -59,13 +64,16 @@ public class CartResponse {
         {
             for (VoucherResponse item : selectedVouchers)
             {
-                if(totalSalePrice*item.getPercentValue()/100 > item.getUpToValue())
+                if(totalSalePrice > item.getApplicableValue())
                 {
-                    totalDiscount += item.getUpToValue();
-                }
-                else
-                {
-                    totalDiscount += item.getPercentValue()/100;
+                    if(totalSalePrice*item.getPercentValue() > item.getUpToValue()*100)
+                    {
+                        totalDiscount += item.getUpToValue();
+                    }
+                    else
+                    {
+                        totalDiscount += totalSalePrice*item.getPercentValue()/100;
+                    }
                 }
             }
         }

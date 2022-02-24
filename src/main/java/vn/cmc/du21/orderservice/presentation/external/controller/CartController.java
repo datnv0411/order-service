@@ -135,7 +135,7 @@ public class CartController {
                         .stream()
                         .map(VoucherMapper::convertVoucherRequestToVoucher)
                         .collect(Collectors.toList()),
-                cartResponse.getTotals().getTotalPrice(),
+                cartResponse.getTotals().getTotalPrice() - cartResponse.getTotals().getTotalSale(),
                 userId
         ).stream().map(VoucherMapper::convertVoucherToVoucherResponse).collect(Collectors.toList());
 
@@ -174,8 +174,7 @@ public class CartController {
                     .exchange(uri, HttpMethod.GET, requestProduct, new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {
                     });
 
-            StandardResponse<ProductResponse> productResponse =
-                    responseProduct.getBody();
+            StandardResponse<ProductResponse> productResponse = responseProduct.getBody();
 
             List<SizeResponse> listSize = productResponse.getData().getSizeResponseList();
             if(cartProductRequest.getSizeId() == 0){

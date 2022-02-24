@@ -11,11 +11,8 @@ import vn.cmc.du21.orderservice.common.DateTimeUtil;
 import vn.cmc.du21.orderservice.presentation.external.response.VoucherResponse;
 import vn.cmc.du21.orderservice.presentation.external.response.VoucherUserResponse;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import javax.transaction.Transactional;
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,15 +22,15 @@ public class VoucherService {
     VoucherRepository voucherRepository;
     @Autowired
     VoucherUserRepository voucherUserRepository;
-    public static Timestamp getTimeNow(){
-        return Timestamp.from(Instant.now());
-    }
+
+    @Transactional
     public List<Voucher> applyVoucher(List<Voucher> listVoucher, long totalPrice, long userId) {
         List<Voucher> newListVoucher = new ArrayList<>();
 
         for(Voucher item : listVoucher)
         {
-            Voucher foundVoucher = voucherRepository.findAvailableVoucher(item.getCodeVoucher(), totalPrice, userId).orElse(null);
+            Voucher foundVoucher = voucherRepository.findAvailableVoucher(item.getCodeVoucher(), totalPrice, userId)
+                    .orElse(null);
             if(foundVoucher != null)
             {
                 newListVoucher.add(foundVoucher);
@@ -51,17 +48,23 @@ public class VoucherService {
     }
 
     @Transactional
-    public void SaveVoucher(long userId, String codeVoucher) throws Throwable{
+    public void saveVoucher(long userId, String codeVoucher) throws Throwable{
         Optional<Voucher> voucher =voucherRepository.findByCodeVoucher(codeVoucher);
         if(voucher.isPresent()){
-            VoucherUserId voucherUserId = new VoucherUserId();
-            voucherUserId.setVoucherId(voucher.get().getVoucherId());
-            voucherUserId.setUserId(userId);
-            VoucherUser voucherUser = new VoucherUser();
-            voucherUser.setVoucherUserId(voucherUserId);
-            voucherUser.setUsedTimes(0);
-            voucherUser.setVoucher(voucher.get());
-            voucherUserRepository.save(voucherUser);
+            Optional<VoucherUser> voucherUsers = voucherUserRepository
+                    .findByVoucherIdAndUserId(voucher.get().getVoucherId(), userId);
+            if (!voucherUsers.isPresent()) {
+                VoucherUserId voucherUserId = new VoucherUserId();
+                voucherUserId.setVoucherId(voucher.get().getVoucherId());
+                voucherUserId.setUserId(userId);
+                VoucherUser voucherUser = new VoucherUser();
+                voucherUser.setVoucherUserId(voucherUserId);
+                voucherUser.setUsedTimes(0);
+                voucherUser.setVoucher(voucher.get());
+                voucherUserRepository.save(voucherUser);
+            }else {
+                throw new RuntimeException("The voucher already on!! ");
+            }
         }else {
             throw new RuntimeException("Not found");
         }
@@ -71,38 +74,41 @@ public class VoucherService {
     public List<VoucherUserResponse> getMyVoucher(long userId) throws Throwable{
         List<VoucherUserResponse> voucherUserResponses = new ArrayList<>();
 
-    for(VoucherUser item : voucherUserRepository.findAllByVoucherUser_UserId(userId) )
-    {
-        VoucherUserResponse voucherUserResponse = new VoucherUserResponse();
-        VoucherResponse voucherResponse = new VoucherResponse();
-        voucherResponse.setVoucherId(item.getVoucher().getVoucherId());
-        voucherResponse.setCodeVoucher(item.getVoucher().getCodeVoucher());
-
-        //compare startTime, endTime to current time, quantity > 0, time of use > usedTime
-        if(item.getVoucher().getStartTime().compareTo(getTimeNow())<0 && item.getVoucher().getEndTime().compareTo(getTimeNow())>0
-                && item.getVoucher().getQuantity()>0 && item.getVoucher().getTimesOfUse() > item.getUsedTimes())
+        for(VoucherUser item : voucherUserRepository.findAllByVoucherUser_UserId(userId))
         {
-            voucherResponse.setStartTime(DateTimeUtil.timestampToString(item.getVoucher().getStartTime()));
-            voucherResponse.setEndTime(DateTimeUtil.timestampToString(item.getVoucher().getEndTime()));
-            voucherResponse.setQuantity(item.getVoucher().getQuantity());
-            voucherResponse.setTimesOfUse(item.getVoucher().getTimesOfUse());
-        }else {
-             continue;
+            VoucherUserResponse voucherUserResponse = new VoucherUserResponse();
+            VoucherResponse voucherResponse = new VoucherResponse();
+            voucherResponse.setVoucherId(item.getVoucher().getVoucherId());
+            voucherResponse.setCodeVoucher(item.getVoucher().getCodeVoucher());
+
+            //compare startTime, endTime to current time, quantity > 0, time of use > usedTime
+            if(item.getVoucher().getStartTime().compareTo(DateTimeUtil.getTimeNow())<0
+                    && item.getVoucher().getEndTime().compareTo(DateTimeUtil.getTimeNow())>0
+                    && item.getVoucher().getQuantity()>0
+                    && item.getVoucher().getTimesOfUse() > item.getUsedTimes()) {
+
+                voucherResponse.setStartTime(DateTimeUtil.timestampToString(item.getVoucher().getStartTime()));
+                voucherResponse.setEndTime(DateTimeUtil.timestampToString(item.getVoucher().getEndTime()));
+                voucherResponse.setQuantity(item.getVoucher().getQuantity());
+                voucherResponse.setTimesOfUse(item.getVoucher().getTimesOfUse());
+
+                voucherResponse.setImage(item.getVoucher().getImage());
+                voucherResponse.setTitle(item.getVoucher().getTitle());
+                voucherResponse.setPercentValue(item.getVoucher().getPercentValue());
+                voucherResponse.setUpToValue(item.getVoucher().getUpToValue());
+                voucherResponse.setApplicableValue(item.getVoucher().getApplicableValue());
+                //set Voucher User Response
+                voucherUserResponse.setVoucherResponse(voucherResponse);
+                voucherUserResponse.setUsedTimes(item.getUsedTimes());
+                //------
+                voucherUserResponses.add(voucherUserResponse);
+            }
         }
-        voucherResponse.setImage(item.getVoucher().getImage());
-        voucherResponse.setTitle(item.getVoucher().getTitle());
-        voucherResponse.setPercentValue(item.getVoucher().getPercentValue());
-        voucherResponse.setUpToValue(item.getVoucher().getUpToValue());
-        voucherResponse.setApplicableValue(item.getVoucher().getApplicableValue());
-        //set Voucher User Response
-        voucherUserResponse.setVoucherResponse(voucherResponse);
-        voucherUserResponse.setUsedTimes(item.getUsedTimes());
-        //------
-        voucherUserResponses.add(voucherUserResponse);
-    }
+
         if(voucherUserResponses.isEmpty()){
             throw new RuntimeException("There are was not voucher to display");
         }
+
         return voucherUserResponses;
     }
 
@@ -117,7 +123,7 @@ public class VoucherService {
             }else {
 
                 //compare startTime, endTime to current time, quantity > 0,
-                if(item.getStartTime().compareTo(getTimeNow())<0 && item.getEndTime().compareTo(getTimeNow())>0
+                if(item.getStartTime().compareTo(DateTimeUtil.getTimeNow())<0 && item.getEndTime().compareTo(DateTimeUtil.getTimeNow())>0
                         && item.getQuantity()>0 )
                 {
                     vouchers.add(item);
