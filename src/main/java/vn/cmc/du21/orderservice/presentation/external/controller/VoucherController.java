@@ -9,6 +9,7 @@ import vn.cmc.du21.orderservice.common.JwtTokenProvider;
 import vn.cmc.du21.orderservice.common.restful.StandardResponse;
 import vn.cmc.du21.orderservice.common.restful.StatusResponse;
 import vn.cmc.du21.orderservice.presentation.external.mapper.VoucherMapper;
+import vn.cmc.du21.orderservice.presentation.external.request.VoucherRequest;
 import vn.cmc.du21.orderservice.presentation.external.response.VoucherResponse;
 import vn.cmc.du21.orderservice.presentation.internal.response.UserResponse;
 import vn.cmc.du21.orderservice.service.VoucherService;
@@ -46,19 +47,20 @@ public class VoucherController {
 
     }
 
-    @PostMapping("/save-voucher/{codeVoucher}")
-    ResponseEntity<Object> SaveVocher(HttpServletRequest request, HttpServletResponse response,
-                                        @PathVariable(name = "codeVoucher") String codeVoucher) throws Throwable {
+    @PostMapping("/save-voucher")
+    ResponseEntity<Object> saveVoucher(HttpServletRequest request, HttpServletResponse response,
+                                        @RequestBody VoucherRequest voucherRequest) throws Throwable {
 
         log.info("Mapped save voucher method {{POST: /voucher/save-voucher/{codeVoucher}");
 
         UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
 
-        voucherService.SaveVoucher(userId, codeVoucher);
+        voucherService.saveVoucher(userId, voucherRequest.getCodeVoucher());
 
         return ResponseEntity.ok().body(
-                new StandardResponse<Object>(StatusResponse.SUCCESSFUL,
+                new StandardResponse<Object>(
+                        StatusResponse.SUCCESSFUL,
                         "Saved")
         );
     }

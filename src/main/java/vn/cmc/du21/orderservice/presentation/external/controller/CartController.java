@@ -133,7 +133,7 @@ public class CartController {
                         .stream()
                         .map(VoucherMapper::convertVoucherRequestToVoucher)
                         .collect(Collectors.toList()),
-                cartResponse.getTotals().getTotalPrice(),
+                cartResponse.getTotals().getTotalPrice() - cartResponse.getTotals().getTotalSale(),
                 userId
         ).stream().map(VoucherMapper::convertVoucherToVoucherResponse).collect(Collectors.toList());
 

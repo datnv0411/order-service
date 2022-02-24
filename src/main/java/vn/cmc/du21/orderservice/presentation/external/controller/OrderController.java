@@ -121,7 +121,8 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.OK).body(
                 new StandardResponse<>(
                         StatusResponse.SUCCESSFUL,
-                        "Success!!"
+                        "Success!!",
+                        orderResponse
                 )
         );
     }

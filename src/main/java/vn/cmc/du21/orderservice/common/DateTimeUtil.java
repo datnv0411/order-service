@@ -3,6 +3,7 @@ package vn.cmc.du21.orderservice.common;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -61,5 +62,9 @@ public class DateTimeUtil {
 
     public static Timestamp stringToTimeStamp(String date) {
         return Timestamp.valueOf(String.format(date, dateTimeFormatter2));
+    }
+
+    public static Timestamp getTimeNow(){
+        return Timestamp.from(Instant.now());
     }
 }
