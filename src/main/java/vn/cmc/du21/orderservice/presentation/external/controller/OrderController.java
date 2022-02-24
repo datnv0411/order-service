@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(path = "/api/v1.0")
 public class OrderController {
-    private static final String BAD_TOKEN = "Bad token !!!";
     @Autowired
     private Environment env;
     @Autowired
@@ -146,7 +145,7 @@ public class OrderController {
         httpHeaders.setBearerAuth(request.getHeader("Authorization").split(" ")[1]);
         String uri = env.getProperty("path.user-service")+"/api/v1.0/address/" + orderRequest.getAddressId() + "";
 
-        HttpEntity<StandardResponse<AddressResponse>> entity = new HttpEntity<>(new StandardResponse<AddressResponse>(), httpHeaders);
+        HttpEntity<StandardResponse<AddressResponse>> entity = new HttpEntity<>(new StandardResponse<>(), httpHeaders);
         ResponseEntity<StandardResponse<AddressResponse>> res = restTemplate
                 .exchange(uri, HttpMethod.GET, entity, new ParameterizedTypeReference<StandardResponse<AddressResponse>>() {});
 

@@ -162,9 +162,7 @@ public class OrderService {
         }
         order.setVouchers(vouchers);
 
-        Order newOrder = orderRepository.save(order);
-
-        return newOrder;
+        return orderRepository.save(order);
     }
 
     public DeliveryAddress getDeliveryAddressByOrderId(long deliveryAddressId) {

@@ -9,6 +9,7 @@ import vn.cmc.du21.orderservice.persistence.internal.repository.CartProductRepos
 import vn.cmc.du21.orderservice.persistence.internal.repository.CartRepository;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +21,17 @@ public class CartService {
     CartProductRepository cartProductRepository;
 
     @Transactional
+    public Cart createCart(long userId){
+
+        Cart newCart = new Cart();
+        newCart.setUserId(userId);
+        List<CartProduct> cartProducts = new ArrayList<>();
+        newCart.setCartProducts(cartProducts);
+
+        return cartRepository.save(newCart);
+    }
+
+    @Transactional
     public Cart getMyCart(long userId) {
         Optional<Cart> foundCart = cartRepository.findByUserId(userId);
         if(foundCart.isPresent())
@@ -28,9 +40,7 @@ public class CartService {
         }
         else
         {
-            Cart newCart = new Cart();
-            newCart.setUserId(userId);
-            return cartRepository.save(newCart);
+            return createCart(userId);
         }
     }
 
@@ -56,16 +66,17 @@ public class CartService {
     }
 
     @Transactional
-    public void createCart(long userId){
-        Cart newCart = new Cart();
-        newCart.setUserId(userId);
-        newCart.setCartId(0);
-        cartRepository.save(newCart);
-    }
-
-    @Transactional
     public Cart findCart (long userId){
-        return cartRepository.findByUserId(userId).orElse(null);
+
+       Cart foundCart = cartRepository.findByUserId(userId).orElse(null);
+       if(foundCart == null)
+       {
+           return createCart(userId);
+       }
+       else
+       {
+           return foundCart;
+       }
     }
 
     @Transactional
@@ -80,18 +91,21 @@ public class CartService {
 
     }
     @Transactional
-    public void removeProduct(CartProductId cartProductId) throws Throwable {
-        CartProduct checkfound = cartProductRepository.findByCartProductId(cartProductId).orElseThrow(
+    public void removeProduct(long cartId, long productId, long sizeId) throws Throwable {
+        CartProductId cartProductId = new CartProductId(cartId, productId, sizeId);
+        CartProduct foundCartProduct = cartProductRepository.findByCartProductId(cartProductId).orElseThrow(
                 () -> {
                     throw new RuntimeException("product does not exist !!!");
                 }
         );
-        cartProductRepository.delete(checkfound);
+        cartProductRepository.delete(foundCartProduct);
     }
+
     @Transactional
     public void removeAll(long cartId){
         cartProductRepository.deleteAllByCartProductId_CartId(cartId);
     }
+
     @Transactional
     public List<CartProduct> findAllByCartId (long cartId){
         return cartProductRepository.findAllByCartProductId_CartId(cartId);

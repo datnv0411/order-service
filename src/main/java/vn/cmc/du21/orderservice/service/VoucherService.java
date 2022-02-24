@@ -118,24 +118,21 @@ public class VoucherService {
 
         for (Voucher item : voucherRepository.findAll()){
             Optional<VoucherUser> voucherUser = voucherUserRepository.findAllByVoucherUser_UserId_VoucherId(userId,item.getVoucherId());
-            if(voucherUser.isPresent()){
-                continue;
-            }else {
 
-                //compare startTime, endTime to current time, quantity > 0,
-                if(item.getStartTime().compareTo(DateTimeUtil.getTimeNow())<0 && item.getEndTime().compareTo(DateTimeUtil.getTimeNow())>0
-                        && item.getQuantity()>0 )
-                {
-                    vouchers.add(item);
-                }
-
+            //compare startTime, endTime to current time, quantity > 0,
+            if(!voucherUser.isPresent()
+                    && item.getStartTime().compareTo(DateTimeUtil.getTimeNow()) < 0
+                    && item.getEndTime().compareTo(DateTimeUtil.getTimeNow()) > 0
+                    && item.getQuantity() > 0) {
+                vouchers.add(item);
             }
-
         }
+
         if(vouchers.isEmpty())
         {
-            throw new RuntimeException("there are not voucher to display");
+            throw new RuntimeException("There are not voucher to display");
         }
+
         return vouchers;
     }
 }

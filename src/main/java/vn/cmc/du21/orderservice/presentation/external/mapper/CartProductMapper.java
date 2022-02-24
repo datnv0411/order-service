@@ -28,7 +28,6 @@ public class CartProductMapper {
         cartProductResponse.setProductResponse(productResponse);
         cartProductResponse.setQuantity(cartProduct.getQuantity());
         cartProductResponse.setSizeId(cartProduct.getCartProductId().getSizeId());
-        cartProductResponse.setTotalPrice(cartProductResponse.getTotalPrice());
 
         return cartProductResponse;
     }

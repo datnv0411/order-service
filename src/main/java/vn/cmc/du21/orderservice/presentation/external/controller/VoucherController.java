@@ -34,7 +34,7 @@ public class VoucherController {
 
         log.info("Mapped getDetailVoucher method {{GET: /voucher/{voucherId}}}");
 
-        VoucherResponse voucherResponse = VoucherMapper.convertVouchertoVoucherResponse(
+        VoucherResponse voucherResponse = VoucherMapper.convertVoucherToVoucherResponse(
                 voucherService.getDetailVoucherById(voucherId)
         );
 
@@ -89,7 +89,7 @@ public class VoucherController {
         UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
 
-        List<VoucherResponse> voucherResponses =voucherService.getListVoucher(userId).stream().map(VoucherMapper::convertVouchertoVoucherResponse).collect(Collectors.toList());
+        List<VoucherResponse> voucherResponses =voucherService.getListVoucher(userId).stream().map(VoucherMapper::convertVoucherToVoucherResponse).collect(Collectors.toList());
         return ResponseEntity.ok().body(
                 new StandardResponse<Object>(
                         StatusResponse.SUCCESSFUL,
