@@ -3,7 +3,6 @@ package vn.cmc.du21.orderservice.presentation.external.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import vn.cmc.du21.orderservice.common.JwtTokenProvider;
@@ -53,18 +52,7 @@ public class VoucherController {
 
         log.info("Mapped save voucher method {{POST: /voucher/save-voucher/{codeVoucher}");
 
-        UserResponse userLogin;
-        try {
-            userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    new StandardResponse<>(
-                            StatusResponse.UNAUTHORIZED,
-                            "Bad token!!!"
-                    )
-            );
-        }
-
+        UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
 
         voucherService.SaveVoucher(userId, codeVoucher);
@@ -80,18 +68,7 @@ public class VoucherController {
 
         log.info("Mapped get my voucher method {{GET: /voucher/get-my-voucher");
 
-        UserResponse userLogin;
-        try {
-            userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    new StandardResponse<>(
-                            StatusResponse.UNAUTHORIZED,
-                            "Bad token!!!"
-                    )
-            );
-        }
-
+        UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
 
         return ResponseEntity.ok().body(
@@ -107,18 +84,7 @@ public class VoucherController {
 
         log.info("Mapped get list voucher method {{GET: /voucher/get-my-voucher");
 
-        UserResponse userLogin;
-        try {
-            userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    new StandardResponse<>(
-                            StatusResponse.UNAUTHORIZED,
-                            "Bad token!!!"
-                    )
-            );
-        }
-
+        UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
 
         List<VoucherResponse> voucherResponses =voucherService.getListVoucher(userId).stream().map(VoucherMapper::convertVouchertoVoucherResponse).collect(Collectors.toList());

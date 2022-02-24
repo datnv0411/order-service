@@ -1,5 +1,6 @@
 package vn.cmc.du21.orderservice.presentation.external.controller;
 
+import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -32,6 +33,16 @@ public class ApiExceptionHandler {
     public StandardResponse toDoException(Exception ex, WebRequest request) {
         return new StandardResponse<>(
                 StatusResponse.BAD_REQUEST,
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
+    public StandardResponse unauthorizedException(Exception ex, WebRequest request) {
+        // quá trình kiểm soat lỗi diễn ra ở đây
+        return new StandardResponse<>(
+                StatusResponse.UNAUTHORIZED,
                 ex.getMessage()
         );
     }

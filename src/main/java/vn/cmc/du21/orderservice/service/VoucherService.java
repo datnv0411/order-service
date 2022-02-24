@@ -33,7 +33,7 @@ public class VoucherService {
 
         for(Voucher item : listVoucher)
         {
-            Voucher foundVoucher = checkAvailableVoucher(item.getCodeVoucher(), totalPrice, userId);
+            Voucher foundVoucher = voucherRepository.findAvailableVoucher(item.getCodeVoucher(), totalPrice, userId).orElse(null);
             if(foundVoucher != null)
             {
                 newListVoucher.add(foundVoucher);
@@ -41,27 +41,6 @@ public class VoucherService {
         }
 
         return newListVoucher;
-    }
-
-
-    public Voucher checkAvailableVoucher(String codeVoucher, long totalPrice, long userId) {
-        Optional<Voucher> foundVoucher = voucherRepository.findByCodeVoucher(codeVoucher);
-        if (foundVoucher.isPresent()) {
-            if (foundVoucher.get().getEndTime().after(Timestamp.valueOf(LocalDateTime.now()))
-                    && foundVoucher.get().getStartTime().before(Timestamp.valueOf(LocalDateTime.now()))
-                    && foundVoucher.get().getQuantity() > 0) {
-                Optional<VoucherUser> voucherUser = voucherUserRepository
-                        .findByVoucherIdAndUserId(foundVoucher.get().getVoucherId(), userId);
-                if (voucherUser.isPresent()) {
-                    if (voucherUser.get().getUsedTimes() < foundVoucher.get().getTimesOfUse()
-                            && totalPrice >= foundVoucher.get().getApplicableValue()) {
-                        return foundVoucher.get();
-                    }
-                }
-            }
-        }
-
-        return null;
     }
 
     @Transactional

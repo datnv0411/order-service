@@ -7,16 +7,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import vn.cmc.du21.orderservice.persistence.internal.entity.*;
-import vn.cmc.du21.orderservice.persistence.internal.repository.DeliveryAddressRepository;
-import vn.cmc.du21.orderservice.persistence.internal.repository.OrderProductRepository;
-import vn.cmc.du21.orderservice.persistence.internal.repository.OrderRepository;
-import vn.cmc.du21.orderservice.persistence.internal.repository.VoucherRepository;
+import vn.cmc.du21.orderservice.persistence.internal.repository.*;
 
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OrderService {
@@ -29,6 +27,8 @@ public class OrderService {
     VoucherRepository voucherRepository;
     @Autowired
     DeliveryAddressRepository deliveryAddressRepository;
+    @Autowired
+    VoucherUserRepository voucherUserRepository;
 
     @Transactional
     public Order getOrderByOrderId(long userId, long orderId) {
@@ -45,16 +45,11 @@ public class OrderService {
         return orderRepository.findOrderByOrderId(userId, orderId).getOrderProducts();
     }
 
-    @Transactional
-    public OrderPayment getPaymentByOrderId(long userId, long orderId) {
-        //return orderRepository.findOrderByOrderId(userId, orderId).getOrderPayments();
-        return null;
-    }
 
     @Transactional
     public Order updateOrder(long orderId, long userId) throws Throwable{
          Order foundOrder = orderRepository.findOrderByOrderId(userId, orderId);
-         foundOrder.setStatusOrder("Cancel !!!");
+         foundOrder.setStatusOrder("Cancel");
          orderRepository.save(foundOrder);
          return foundOrder;
     }
@@ -121,7 +116,7 @@ public class OrderService {
         return totalAfterVAT(orderId) - totalVoucherDiscount(userId, orderId);
     }
 
-    @Transactional
+   @Transactional
     public Order createOrder(Order order, DeliveryAddress deliveryAddress){
 
         // order
@@ -129,24 +124,39 @@ public class OrderService {
         order.setStatusOrder("Chờ thanh toán");
 
         // list products + size + quantity
+        long totalPrice = 0;
         for(OrderProduct item : order.getOrderProducts())
         {
             item.setOrder(order);
+            totalPrice += item.getPriceSale() * item.getQuantity();
         }
         // order address
         order.setDeliveryAddress(deliveryAddress);
         // order voucher
         List<Voucher> vouchers = new ArrayList<>();
         for (Voucher item : order.getVouchers()){
-            Voucher voucher = voucherRepository.findByCodeVoucher(item.getCodeVoucher()).orElse(null);
-            if(voucher!=null)
+            Voucher foundVoucher = voucherRepository.findAvailableVoucher(item.getCodeVoucher(), totalPrice, order.getUserId()).orElse(null);
+            if(foundVoucher!=null)
             {
-                vouchers.add(voucher);
+                foundVoucher.setQuantity(foundVoucher.getQuantity() -1);
+                voucherRepository.save(foundVoucher);
+
+                Optional<VoucherUser> voucherUser =
+                        voucherUserRepository.findByVoucherIdAndUserId(foundVoucher.getVoucherId(), order.getUserId());
+                if(voucherUser.isPresent())
+                {
+                    voucherUser.get().setUsedTimes(voucherUser.get().getUsedTimes() + 1);
+                }
+                voucherUserRepository.save(voucherUser.get());
+
+                vouchers.add(foundVoucher);
             }
         }
         order.setVouchers(vouchers);
 
-        return orderRepository.save(order);
+        Order newOrder = orderRepository.save(order);
+
+        return newOrder;
     }
 
     public DeliveryAddress getDeliveryAddressByOrderId(long deliveryAddressId) {

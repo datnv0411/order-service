@@ -1,7 +1,7 @@
 package vn.cmc.du21.orderservice.common;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.core.env.Environment;
 import org.springframework.web.client.RestTemplate;
 import vn.cmc.du21.orderservice.presentation.internal.response.UserResponse;
@@ -15,14 +15,30 @@ public class JwtTokenProvider {
         throw new IllegalStateException("Utility class");
     }
 
-    public static UserResponse getInfoUserFromToken(HttpServletRequest request, Environment env)
-    {
+    // Đoạn JWT_SECRET này là bí mật, chỉ có phía server biết
+    private static final String JWT_SECRET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    //Thời gian có hiệu lực của chuỗi jwt
+    private static final long JWT_AMOUNT_TO_ADD_TIME = 1;
+    private static final ChronoUnit JWT_TIME_UNIT = ChronoUnit.DAYS;
+
+    public static UserResponse getInfoUserFromToken(HttpServletRequest request, Environment env) throws AuthenticationException {
         log.info("Mapped getInfoUserFromToken method");
         String[] arr = request.getHeader("Authorization").split(" ");
         String token = arr[1];
         final String uri = env.getProperty("path.user-service") + "/api/v1.0/authentication/verify?token=" + token;
         RestTemplate restTemplate = new RestTemplate();
 
-        return restTemplate.getForObject(uri, UserResponse.class);
+        UserResponse userLogin;
+        try
+        {
+            userLogin = restTemplate.getForObject(uri, UserResponse.class);
+        }
+        catch (Exception e)
+        {
+            throw new AuthenticationException("BAD token !!!");
+        }
+
+        return userLogin;
     }
 }

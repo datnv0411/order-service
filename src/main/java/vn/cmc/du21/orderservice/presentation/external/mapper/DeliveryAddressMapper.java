@@ -14,8 +14,8 @@ public class DeliveryAddressMapper {
         deliveryAddress.setTypeAddress(addressResponse.getTypeAddress());
         deliveryAddress.setFullName(addressResponse.getFullName());
         deliveryAddress.setCellphone(addressResponse.getCellphone());
-        deliveryAddress.setProvince(deliveryAddress.getProvince());
-        deliveryAddress.setDistrict(deliveryAddress.getDistrict());
+        deliveryAddress.setProvince(addressResponse.getProvince());
+        deliveryAddress.setDistrict(addressResponse.getDistrict());
         deliveryAddress.setTown(addressResponse.getTown());
         deliveryAddress.setSpecificAddress(addressResponse.getSpecificAddress());
 
