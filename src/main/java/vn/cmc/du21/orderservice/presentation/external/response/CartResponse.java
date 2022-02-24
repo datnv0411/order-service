@@ -59,7 +59,7 @@ public class CartResponse {
         // tong tien sale (gia sale san pham)
         totalResponse.setTotalSale(totalSale);
 
-        long shippingFee = 40; // phi ship
+        long shippingFee = 50000; // phi ship
         if(totalProduct == 0)
         {
             shippingFee = 0;
