@@ -1,5 +1,7 @@
 package vn.cmc.du21.orderservice.presentation.external.response;
 
+import vn.cmc.du21.orderservice.common.PathImageUtil;
+
 public class VoucherResponse {
     private long voucherId;
     private String codeVoucher;
@@ -79,7 +81,7 @@ public class VoucherResponse {
     }
 
     public String getImage() {
-        return image;
+        return PathImageUtil.getPathImage(image);
     }
 
     public void setImage(String image) {
