@@ -45,11 +45,10 @@ public class OrderService {
         return orderRepository.findOrderByOrderId(userId, orderId).getOrderProducts();
     }
 
-
     @Transactional
     public Order updateOrder(long orderId, long userId) throws Throwable{
          Order foundOrder = orderRepository.findOrderByOrderId(userId, orderId);
-         foundOrder.setStatusOrder("Cancel");
+         foundOrder.setStatusOrder("Hủy");
          orderRepository.save(foundOrder);
          return foundOrder;
     }

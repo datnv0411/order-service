@@ -8,8 +8,6 @@ import vn.cmc.du21.orderservice.persistence.internal.repository.VoucherRepositor
 import vn.cmc.du21.orderservice.persistence.internal.repository.VoucherUserRepository;
 import vn.cmc.du21.orderservice.persistence.internal.entity.VoucherUserId;
 import vn.cmc.du21.orderservice.common.DateTimeUtil;
-import vn.cmc.du21.orderservice.presentation.external.response.VoucherResponse;
-import vn.cmc.du21.orderservice.presentation.external.response.VoucherUserResponse;
 
 import java.util.ArrayList;
 import javax.transaction.Transactional;
@@ -71,59 +69,47 @@ public class VoucherService {
     }
 
     @Transactional
-    public List<VoucherUserResponse> getMyVoucher(long userId) throws Throwable{
-        List<VoucherUserResponse> voucherUserResponses = new ArrayList<>();
+    public List<VoucherUser> getMyVoucher(long userId, String status) throws Throwable{
+        List<VoucherUser> voucherUsers = new ArrayList<>();
+        if(status.equals("available")) {
+            for (VoucherUser item : voucherUserRepository.findAllByVoucherUser_UserId(userId)) {
 
-        for(VoucherUser item : voucherUserRepository.findAllByVoucherUser_UserId(userId))
-        {
-            VoucherUserResponse voucherUserResponse = new VoucherUserResponse();
-            VoucherResponse voucherResponse = new VoucherResponse();
-            voucherResponse.setVoucherId(item.getVoucher().getVoucherId());
-            voucherResponse.setCodeVoucher(item.getVoucher().getCodeVoucher());
+                //compare startTime, endTime to current time, quantity > 0, time of use > usedTime
+                if (item.getVoucher().getStartTime().compareTo(DateTimeUtil.getTimeNow()) < 0
+                        && item.getVoucher().getEndTime().compareTo(DateTimeUtil.getTimeNow()) > 0
+                        && item.getVoucher().getQuantity() > 0
+                        && item.getVoucher().getTimesOfUse() > item.getUsedTimes()) {
 
-            //compare startTime, endTime to current time, quantity > 0, time of use > usedTime
-            if(item.getVoucher().getStartTime().compareTo(DateTimeUtil.getTimeNow())<0
-                    && item.getVoucher().getEndTime().compareTo(DateTimeUtil.getTimeNow())>0
-                    && item.getVoucher().getQuantity()>0
-                    && item.getVoucher().getTimesOfUse() > item.getUsedTimes()) {
-
-                voucherResponse.setStartTime(DateTimeUtil.timestampToString(item.getVoucher().getStartTime()));
-                voucherResponse.setEndTime(DateTimeUtil.timestampToString(item.getVoucher().getEndTime()));
-                voucherResponse.setQuantity(item.getVoucher().getQuantity());
-                voucherResponse.setTimesOfUse(item.getVoucher().getTimesOfUse());
-
-                voucherResponse.setImage(item.getVoucher().getImage());
-                voucherResponse.setTitle(item.getVoucher().getTitle());
-                voucherResponse.setPercentValue(item.getVoucher().getPercentValue());
-                voucherResponse.setUpToValue(item.getVoucher().getUpToValue());
-                voucherResponse.setApplicableValue(item.getVoucher().getApplicableValue());
-                //set Voucher User Response
-                voucherUserResponse.setVoucherResponse(voucherResponse);
-                voucherUserResponse.setUsedTimes(item.getUsedTimes());
-                //------
-                voucherUserResponses.add(voucherUserResponse);
+                    voucherUsers.add(item);
+                }
             }
+        }else {
+            voucherUsers = voucherUserRepository.findAllByVoucherUser_UserId(userId);
         }
 
-        if(voucherUserResponses.isEmpty()){
+
+        if(voucherUsers.isEmpty()){
             throw new RuntimeException("There are was not voucher to display");
         }
 
-        return voucherUserResponses;
+        return voucherUsers;
     }
+
 
     @Transactional
     public List<Voucher> getListVoucher(long userId)throws Throwable{
         List<Voucher> vouchers = new ArrayList<>();
 
         for (Voucher item : voucherRepository.findAll()){
-            Optional<VoucherUser> voucherUser = voucherUserRepository.findAllByVoucherUser_UserId_VoucherId(userId,item.getVoucherId());
+            Optional<VoucherUser> voucherUser =
+                    voucherUserRepository.findAllByVoucherUser_UserId_VoucherId(userId,item.getVoucherId());
 
             //compare startTime, endTime to current time, quantity > 0,
             if(!voucherUser.isPresent()
                     && item.getStartTime().compareTo(DateTimeUtil.getTimeNow()) < 0
                     && item.getEndTime().compareTo(DateTimeUtil.getTimeNow()) > 0
                     && item.getQuantity() > 0) {
+
                 vouchers.add(item);
             }
         }

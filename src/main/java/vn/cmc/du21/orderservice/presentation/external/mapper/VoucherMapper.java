@@ -29,6 +29,7 @@ public class VoucherMapper {
 //    }
 
     public static VoucherResponse convertVoucherToVoucherResponse(Voucher voucher) {
+
         String startTime = voucher.getStartTime() == null ? null : DateTimeUtil.timestampToString(voucher.getStartTime());
         String endTime = voucher.getEndTime() == null ? null : DateTimeUtil.timestampToString(voucher.getEndTime());
         return new VoucherResponse(voucher.getVoucherId(), voucher.getCodeVoucher(), startTime, endTime,

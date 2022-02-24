@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import vn.cmc.du21.orderservice.persistence.internal.entity.Voucher;
 import vn.cmc.du21.orderservice.persistence.internal.entity.VoucherUser;
 import vn.cmc.du21.orderservice.persistence.internal.entity.VoucherUserId;
 
@@ -21,4 +22,6 @@ public interface VoucherUserRepository extends JpaRepository<VoucherUser, Vouche
 
     @Query(value = "SELECT * FROM voucheruser WHERE userId = :userId And voucher_voucherId = :voucherId",nativeQuery = true)
     Optional<VoucherUser> findAllByVoucherUser_UserId_VoucherId(@Param(value = "userId") long userId,@Param(value = "voucherId") long voucherId);
+
+
 }
