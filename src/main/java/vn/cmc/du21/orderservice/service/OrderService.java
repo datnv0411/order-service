@@ -116,7 +116,7 @@ public class OrderService {
         return totalAfterVAT(orderId) - totalVoucherDiscount(userId, orderId);
     }
 
-   @Transactional
+    @Transactional
     public Order createOrder(Order order, DeliveryAddress deliveryAddress){
 
         // order
@@ -147,9 +147,17 @@ public class OrderService {
                 {
                     voucherUser.get().setUsedTimes(voucherUser.get().getUsedTimes() + 1);
                 }
+                else
+                {
+                    throw new RuntimeException("Voucher cannot be applied, please try again !!!");
+                }
                 voucherUserRepository.save(voucherUser.get());
 
                 vouchers.add(foundVoucher);
+            }
+            else
+            {
+                throw new RuntimeException("Voucher cannot be applied, please try again !!!");
             }
         }
         order.setVouchers(vouchers);
