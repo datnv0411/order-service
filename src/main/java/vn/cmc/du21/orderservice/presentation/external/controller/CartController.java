@@ -91,6 +91,7 @@ public class CartController {
         );
     }
 
+    // update cart
     @PutMapping("/update")
     ResponseEntity<Object> updateCart(@RequestBody CartRequest cartRequest,
                                       HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
