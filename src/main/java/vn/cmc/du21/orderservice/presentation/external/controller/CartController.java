@@ -286,4 +286,71 @@ public class CartController {
                 )
         );
     }
+
+    @DeleteMapping("/minus-quantity")
+    ResponseEntity<Object> minusProduct(@RequestBody CartProductRequest cartProductRequest
+            , HttpServletRequest request, HttpServletResponse response) throws Throwable{
+
+        log.info("Mapped removeProduct method {{DELETE: /minus-quantity}}");
+        UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
+        long userId = userLogin.getUserId();
+        try{
+            final String uri = env.getProperty(PATH_INVENTORY_SERVICE) + GET_DETAIL_PRODUCT + cartProductRequest.getProductId();
+
+            RestTemplate restTemplate = new RestTemplate();
+            HttpEntity<StandardResponse<ProductResponse>> requestProduct = new HttpEntity<>(new StandardResponse<>());
+            ResponseEntity<StandardResponse<ProductResponse>> responseProduct = restTemplate
+                    .exchange(uri, HttpMethod.GET, requestProduct, new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {
+                    });
+
+            StandardResponse<ProductResponse> productResponse = responseProduct.getBody();
+
+            List<SizeResponse> listSize = productResponse.getData().getSizeResponseList();
+            if(cartProductRequest.getSizeId() == 0){
+                for (SizeResponse item : listSize){
+                    if (item.isSizeDefault()) cartProductRequest.setSizeId(item.getSizeId());
+                }
+            }
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new StandardResponse<>(
+                            StatusResponse.NOT_FOUND,
+                            "Product not found",""
+                    )
+            );
+        }
+
+        cartService.minusQuantity(cartService.getMyCart(userId).getCartId(), cartProductRequest.getProductId(), cartProductRequest.getSizeId());
+
+        List<CartProductResponse> cartProductResponseList = cartService.getMyCart(userId).getCartProducts()
+                .stream()
+                .map(CartProductMapper::convertCartProductToCartProductResponse)
+                .collect(Collectors.toList());
+
+        for (CartProductResponse item : cartProductResponseList){
+            final String uri = env.getProperty(PATH_INVENTORY_SERVICE) + GET_DETAIL_PRODUCT +
+                    item.getProductResponse().getProductId();
+
+            RestTemplate restTemplate = new RestTemplate();
+            HttpEntity<StandardResponse<ProductResponse>> requestProduct = new HttpEntity<>(new StandardResponse<>());
+            ResponseEntity<StandardResponse<ProductResponse>> responseProduct = restTemplate
+                    .exchange(uri, HttpMethod.GET, requestProduct, new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {
+                    });
+
+            ProductResponse productResponse = responseProduct.getBody().getData();
+
+            item.setProductResponse(productResponse);
+        }
+
+        CartResponse cartResponse = new CartResponse();
+        cartResponse.setItems(cartProductResponseList);
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new StandardResponse<>(
+                        StatusResponse.SUCCESSFUL,
+                        "Deleted",
+                        cartResponse
+                )
+        );
+    }
 }

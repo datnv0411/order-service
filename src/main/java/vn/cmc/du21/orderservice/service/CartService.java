@@ -110,4 +110,15 @@ public class CartService {
     public List<CartProduct> findAllByCartId (long cartId){
         return cartProductRepository.findAllByCartProductId_CartId(cartId);
     }
+
+    @Transactional
+    public void minusQuantity(long cartId, long productId, long sizeId) throws Throwable {
+        CartProductId cartProductId = new CartProductId(cartId, productId, sizeId);
+        CartProduct foundCartProduct = cartProductRepository.findByCartProductId(cartProductId).orElseThrow(
+                () -> {
+                    throw new RuntimeException("product does not exist !!!");
+                }
+        );
+        foundCartProduct.setQuantity(foundCartProduct.getQuantity()-1);
+    }
 }
