@@ -39,6 +39,9 @@ public class OrderController {
     @Autowired
     OrderService orderService;
 
+    private static final String GET_INFO_PAYMENT = "/api/v1.0/get-info-payment";
+    private static final String PATH_PAYMENT_SERVICE = "path.payment-service";
+
     //get detail order
     @GetMapping("/order/{orderId}")
     ResponseEntity<Object> getDetailOrder(@PathVariable(name = "orderId") long orderId,
@@ -89,7 +92,7 @@ public class OrderController {
     ResponseEntity<Object> updateStatusOrder(@PathVariable(name = "orderId") long orderId,
                                           HttpServletRequest request, HttpServletResponse response) throws Throwable{
 
-        log.info("Mapped createOrder method {{PUT: /order/{orderId}}}");
+        log.info("Mapped updateStatusOrder method {{PUT: /order/cancel/{orderId}}}");
 
         UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
@@ -114,6 +117,62 @@ public class OrderController {
 
         OrderResponse orderResponse = OrderMapper.convertToOrderResponse(
                 orderService.updateOrder(orderId, userId), orderProductResponses
+                , orderPaymentResponse, addressResponse
+                , totalResponse
+        );
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new StandardResponse<>(
+                        StatusResponse.SUCCESSFUL,
+                        "Success!!",
+                        orderResponse
+                )
+        );
+    }
+
+    // update status after payment
+    @PutMapping("/order/paid")
+    ResponseEntity<Object> updateStatusOrderAfterPaid(@RequestParam(name = "orderId") long orderId,
+                                             @RequestParam(name = "paymentId") long paymentId,
+                                             HttpServletRequest request, HttpServletResponse response) throws Throwable{
+
+        log.info("Mapped updateStatusOrderAfterPaid method {{PUT: /order/paid/{orderId}}}");
+
+        UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
+        long userId = userLogin.getUserId();
+
+        // get payment response
+        final String uri = env.getProperty(PATH_PAYMENT_SERVICE) + GET_INFO_PAYMENT
+                + "?orderId=" + orderId + "?paymentId=" + paymentId;
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpEntity<StandardResponse<PaymentResponse>> requestPayment = new HttpEntity<>(new StandardResponse<>());
+        ResponseEntity<StandardResponse<PaymentResponse>> responsePayment = restTemplate
+                .exchange(uri, HttpMethod.GET, requestPayment, new ParameterizedTypeReference<StandardResponse<PaymentResponse>>() {
+                });
+
+        PaymentResponse paymentResponse = responsePayment.getBody().getData();
+
+        // get detail address
+        DeliveryAddressResponse addressResponse = DeliveryAddressMapper.convertDeliveryAddressToDeliveryAddressResponse(
+                orderService.getDeliveryAddressByOrderId(
+                        orderService.getOrderByOrderId(userId, orderId).getDeliveryAddress().getDeliveryAddressId()
+                ));
+
+        // get list product
+        List<OrderProductResponse> orderProductResponses = orderService.getProductByOrderId(userId, orderId)
+                .stream().map(OrderProductMapper::convertToOrderProductResponse).collect(Collectors.toList());
+
+        orderProductResponses = getDetailProduct(orderProductResponses);
+
+        // get order payment
+        PaymentResponse orderPaymentResponse = new PaymentResponse();
+
+        // get total order
+        TotalOrderResponse totalResponse = getTotalOrder(userId, orderId);
+
+        OrderResponse orderResponse = OrderMapper.convertToOrderResponse(
+                orderService.updateOrderAfterPaid(orderId, userId, paymentResponse.ge), orderProductResponses
                 , orderPaymentResponse, addressResponse
                 , totalResponse
         );

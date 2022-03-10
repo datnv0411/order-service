@@ -59,6 +59,19 @@ public class OrderService {
     }
 
     @Transactional
+    public Order updateOrderAfterPaid(long orderId, long userId) throws Throwable{
+        String statusOrder = "D thanh toán";
+        Order foundOrder = orderRepository.findOrderByOrderId(userId, orderId);
+        if(foundOrder.getStatusOrder().equals(statusOrder)){
+            foundOrder.setStatusOrder("Đã thanh toán");
+            orderRepository.save(foundOrder);
+        } else {
+            throw new RuntimeException("Can't cancel this order");
+        }
+        return foundOrder;
+    }
+
+    @Transactional
     public long totalPrice(long orderId){
         List<OrderProduct> orderProducts = orderProductRepository.findByOrderProductId(orderId);
         long totalPrice = 0;
