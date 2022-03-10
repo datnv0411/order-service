@@ -54,9 +54,16 @@ public class CartResponse {
             totalSalePrice += item.getTotalPrice();
         }
         totalSale = totalPrice - totalSalePrice;
+        // tong tien cac san pham (gia sale san pham)
+        totalResponse.setTotalPriceWithSale(totalSalePrice);
+        // tong tien sale (gia sale san pham)
         totalResponse.setTotalSale(totalSale);
 
-        long shippingFee = 40; // phi ship
+        long shippingFee = 50000; // phi ship
+        if(totalProduct == 0)
+        {
+            shippingFee = 0;
+        }
         totalResponse.setShippingFee(shippingFee);
 
         long totalDiscount = 0; // tong giam gia (phieu giam gia)

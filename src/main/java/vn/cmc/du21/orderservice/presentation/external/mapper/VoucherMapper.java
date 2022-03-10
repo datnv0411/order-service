@@ -16,19 +16,20 @@ public class VoucherMapper {
         return voucher;
     }
 
+//    public static VoucherResponse convertVoucherToVoucherResponse(Voucher voucher) {
+//        VoucherResponse voucherResponse = new VoucherResponse();
+//
+//        voucherResponse.setVoucherId(voucher.getVoucherId());
+//        voucherResponse.setCodeVoucher(voucher.getCodeVoucher());
+//        voucherResponse.setPercentValue(voucher.getPercentValue());
+//        voucherResponse.setUpToValue(voucher.getUpToValue());
+//        voucherResponse.setApplicableValue(voucher.getApplicableValue());
+//
+//        return voucherResponse;
+//    }
+
     public static VoucherResponse convertVoucherToVoucherResponse(Voucher voucher) {
-        VoucherResponse voucherResponse = new VoucherResponse();
 
-        voucherResponse.setVoucherId(voucher.getVoucherId());
-        voucherResponse.setCodeVoucher(voucher.getCodeVoucher());
-        voucherResponse.setPercentValue(voucher.getPercentValue());
-        voucherResponse.setUpToValue(voucher.getUpToValue());
-        voucherResponse.setApplicableValue(voucher.getApplicableValue());
-
-        return voucherResponse;
-    }
-
-    public static VoucherResponse convertVouchertoVoucherResponse(Voucher voucher) {
         String startTime = voucher.getStartTime() == null ? null : DateTimeUtil.timestampToString(voucher.getStartTime());
         String endTime = voucher.getEndTime() == null ? null : DateTimeUtil.timestampToString(voucher.getEndTime());
         return new VoucherResponse(voucher.getVoucherId(), voucher.getCodeVoucher(), startTime, endTime,

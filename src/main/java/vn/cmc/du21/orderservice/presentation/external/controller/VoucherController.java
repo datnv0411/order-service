@@ -9,8 +9,10 @@ import vn.cmc.du21.orderservice.common.JwtTokenProvider;
 import vn.cmc.du21.orderservice.common.restful.StandardResponse;
 import vn.cmc.du21.orderservice.common.restful.StatusResponse;
 import vn.cmc.du21.orderservice.presentation.external.mapper.VoucherMapper;
+import vn.cmc.du21.orderservice.presentation.external.mapper.VoucherUserMapper;
 import vn.cmc.du21.orderservice.presentation.external.request.VoucherRequest;
 import vn.cmc.du21.orderservice.presentation.external.response.VoucherResponse;
+import vn.cmc.du21.orderservice.presentation.external.response.VoucherUserResponse;
 import vn.cmc.du21.orderservice.presentation.internal.response.UserResponse;
 import vn.cmc.du21.orderservice.service.VoucherService;
 
@@ -34,7 +36,7 @@ public class VoucherController {
 
         log.info("Mapped getDetailVoucher method {{GET: /voucher/{voucherId}}}");
 
-        VoucherResponse voucherResponse = VoucherMapper.convertVouchertoVoucherResponse(
+        VoucherResponse voucherResponse = VoucherMapper.convertVoucherToVoucherResponse(
                 voucherService.getDetailVoucherById(voucherId)
         );
 
@@ -66,18 +68,27 @@ public class VoucherController {
     }
 
     @GetMapping("/get-my-voucher")
-    ResponseEntity<Object> getMyVoucher(HttpServletRequest request, HttpServletResponse response) throws Throwable {
+    ResponseEntity<Object> getMyVoucher(HttpServletRequest request, HttpServletResponse response
+                                        ,@RequestParam(value = "status", required = false) String status) throws Throwable {
 
         log.info("Mapped get my voucher method {{GET: /voucher/get-my-voucher");
 
-        UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
-        long userId = userLogin.getUserId();
+      UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
+      long userId = userLogin.getUserId();
 
+        if(status.equals("") || status == null){
+            status = "all";
+        }else {
+            status="available";
+        }
+
+        List<VoucherUserResponse> voucherUserResponse = voucherService.getMyVoucher(userId,status)
+                .stream().map(VoucherUserMapper::convertVoucherUserTpVoucherResponse).collect(Collectors.toList());
         return ResponseEntity.ok().body(
                 new StandardResponse<Object>(
                         StatusResponse.SUCCESSFUL,
                         "Found!!",
-                        voucherService.getMyVoucher(userId))
+                        voucherUserResponse)
         );
     }
 
@@ -89,7 +100,12 @@ public class VoucherController {
         UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
 
-        List<VoucherResponse> voucherResponses =voucherService.getListVoucher(userId).stream().map(VoucherMapper::convertVouchertoVoucherResponse).collect(Collectors.toList());
+        List<VoucherResponse> voucherResponses =
+                voucherService.getListVoucher(userId)
+                        .stream()
+                        .map(VoucherMapper::convertVoucherToVoucherResponse)
+                        .collect(Collectors.toList());
+
         return ResponseEntity.ok().body(
                 new StandardResponse<Object>(
                         StatusResponse.SUCCESSFUL,

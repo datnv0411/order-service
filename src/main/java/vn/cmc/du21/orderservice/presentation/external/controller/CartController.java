@@ -29,7 +29,6 @@ import vn.cmc.du21.orderservice.service.VoucherService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -66,14 +65,19 @@ public class CartController {
                     item.getProductResponse().getProductId();
 
             RestTemplate restTemplate = new RestTemplate();
+
             HttpEntity<StandardResponse<ProductResponse>> requestItem = new HttpEntity<>(new StandardResponse<>());
-            ResponseEntity<StandardResponse<ProductResponse>> responseItem = restTemplate
-                    .exchange(uri, HttpMethod.GET, requestItem, new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {
-                    });
+
+            ResponseEntity<StandardResponse<ProductResponse>> responseItem =
+                    restTemplate.exchange(
+                            uri, HttpMethod.GET, requestItem,
+                            new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {}
+                    );
 
             StandardResponse<ProductResponse> productResponse = responseItem.getBody();
 
             item.setProductResponse(productResponse.getData());
+
         }
 
         cartResponse.setItems(cartProductResponseList);
@@ -148,7 +152,7 @@ public class CartController {
         );
     }
 
-    @GetMapping("/add")
+    @PostMapping("/add")
     ResponseEntity<Object> addProduct (@RequestBody CartProductRequest cartProductRequest
                                         , HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
@@ -158,11 +162,7 @@ public class CartController {
 
         UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
-        
-        //check cart exist
-        if(cartService.findCart(userId)==null){
-            cartService.createCart(userId);
-        }
+
         try{
             final String uri = env.getProperty(PATH_INVENTORY_SERVICE) + GET_DETAIL_PRODUCT + cartProductRequest.getProductId();
 
@@ -180,7 +180,6 @@ public class CartController {
                     if (item.isSizeDefault()) cartProductRequest.setSizeId(item.getSizeId());
                 }
             }
-
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     new StandardResponse<>(
@@ -189,12 +188,20 @@ public class CartController {
                     )
             );
         }
-        cartProductRequest.setCartId(cartService.findCart(userId).getCartId());
-        cartService.addProduct(CartProductMapper.convertCartProductRequestToCartProduct(cartProductRequest,cartService.findCart(userId)));
 
-        List<CartProductResponse> listResponse =  CartProductMapper.convertCartProductToCartProductResponse(cartService.findAllByCartId(cartProductRequest.getCartId()));
-        for (CartProductResponse item : list){
-            final String uri = env.getProperty(PATH_INVENTORY_SERVICE) + GET_DETAIL_PRODUCT + item.getCartProductId().getProductId();
+        cartProductRequest.setCartId(cartService.findCart(userId).getCartId());
+        cartService.addProduct(
+                CartProductMapper.convertCartProductRequestToCartProduct(cartProductRequest,cartService.findCart(userId))
+        );
+
+        List<CartProductResponse> cartProductResponses =
+                cartService.findAllByCartId(cartProductRequest.getCartId())
+                .stream()
+                .map(CartProductMapper::convertCartProductToCartProductResponse)
+                .collect(Collectors.toList());
+        for (CartProductResponse item : cartProductResponses){
+            final String uri = env.getProperty(PATH_INVENTORY_SERVICE) + GET_DETAIL_PRODUCT +
+                    item.getProductResponse().getProductId();
 
             RestTemplate restTemplate = new RestTemplate();
             HttpEntity<StandardResponse<ProductResponse>> requestProduct = new HttpEntity<>(new StandardResponse<>());
@@ -204,12 +211,17 @@ public class CartController {
 
             ProductResponse productResponse = responseProduct.getBody().getData();
 
-            listResponse.add(CartProductMapper.convertToCartProductResponse(item,productResponse));
+            item.setProductResponse(productResponse);
         }
+
+        CartResponse cartResponse = new CartResponse();
+        cartResponse.setItems(cartProductResponses);
+
         return ResponseEntity.status(HttpStatus.OK).body(
                 new StandardResponse<>(
                         StatusResponse.SUCCESSFUL,
-                        "Added",listResponse
+                        "Added",
+                        cartResponse
                 )
         );
     }
@@ -223,17 +235,16 @@ public class CartController {
         UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
 
-        if(cartService.findCart(userId)==null){
-            cartService.createCart(userId);
-        }
+        cartService.removeProduct(cartService.getMyCart(userId).getCartId(), productId, sizeId);
 
-        CartProductId cartProductId = new CartProductId(cartService.findCart(userId).getCartId(), productId, sizeId);
-        cartService.removeProduct(cartProductId);
+        List<CartProductResponse> cartProductResponseList = cartService.getMyCart(userId).getCartProducts()
+                .stream()
+                .map(CartProductMapper::convertCartProductToCartProductResponse)
+                .collect(Collectors.toList());
 
-        List<CartProductResponse> listResponse = new ArrayList<>();
-        List<CartProduct> list = cartService.findAllByCartId(cartService.findCart(userId).getCartId());
-        for (CartProduct item : list){
-            final String uri = env.getProperty(PATH_INVENTORY_SERVICE) + GET_DETAIL_PRODUCT + item.getCartProductId().getProductId();
+        for (CartProductResponse item : cartProductResponseList){
+            final String uri = env.getProperty(PATH_INVENTORY_SERVICE) + GET_DETAIL_PRODUCT +
+                    item.getProductResponse().getProductId();
 
             RestTemplate restTemplate = new RestTemplate();
             HttpEntity<StandardResponse<ProductResponse>> requestProduct = new HttpEntity<>(new StandardResponse<>());
@@ -243,12 +254,17 @@ public class CartController {
 
             ProductResponse productResponse = responseProduct.getBody().getData();
 
-            listResponse.add(CartProductMapper.convertToCartProductResponse(item,productResponse));
+            item.setProductResponse(productResponse);
         }
+
+        CartResponse cartResponse = new CartResponse();
+        cartResponse.setItems(cartProductResponseList);
+
         return ResponseEntity.status(HttpStatus.OK).body(
                 new StandardResponse<>(
                         StatusResponse.SUCCESSFUL,
-                        "Deleted",listResponse
+                        "Deleted",
+                        cartResponse
                 )
         );
     }
@@ -260,15 +276,12 @@ public class CartController {
         UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
 
-        if(cartService.findCart(userId)==null){
-            cartService.createCart(userId);
-        }
         long cartId = cartService.findCart(userId).getCartId();
         cartService.removeAll(cartId);
         return ResponseEntity.status(HttpStatus.OK).body(
                 new StandardResponse<>(
                         StatusResponse.SUCCESSFUL,
-                        "Deleted all",null
+                        "Deleted all"
 
                 )
         );

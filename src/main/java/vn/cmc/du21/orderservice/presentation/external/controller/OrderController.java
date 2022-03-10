@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(path = "/api/v1.0")
 public class OrderController {
-    private static final String BAD_TOKEN = "Bad token !!!";
     @Autowired
     private Environment env;
     @Autowired

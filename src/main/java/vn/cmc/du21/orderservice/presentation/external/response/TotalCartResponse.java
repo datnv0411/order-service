@@ -4,6 +4,7 @@ public class TotalCartResponse {
     private int totalProduct; // tong so san pham
     private long totalPrice; // tong gia cac san pham (gia k sale)
     private long totalSale; // tong giam tien sale (cua tung san pham)
+    private long totalPriceWithSale; // tong tien san pham (gia sale)
     private long shippingFee; // phi ship
     private long totalDiscount; // tong giam gia (phieu giam gia)
     private long totalPaySum; // tong tien phai tra
@@ -11,10 +12,11 @@ public class TotalCartResponse {
     public TotalCartResponse() {
     }
 
-    public TotalCartResponse(int totalProduct, long totalPrice, long totalSale, long shippingFee, long totalDiscount, long totalPaySum) {
+    public TotalCartResponse(int totalProduct, long totalPrice, long totalSale, long totalPriceWithSale, long shippingFee, long totalDiscount, long totalPaySum) {
         this.totalProduct = totalProduct;
         this.totalPrice = totalPrice;
         this.totalSale = totalSale;
+        this.totalPriceWithSale = totalPriceWithSale;
         this.shippingFee = shippingFee;
         this.totalDiscount = totalDiscount;
         this.totalPaySum = totalPaySum;
@@ -42,6 +44,14 @@ public class TotalCartResponse {
 
     public void setTotalSale(long totalSale) {
         this.totalSale = totalSale;
+    }
+
+    public long getTotalPriceWithSale() {
+        return totalPriceWithSale;
+    }
+
+    public void setTotalPriceWithSale(long totalPriceWithSale) {
+        this.totalPriceWithSale = totalPriceWithSale;
     }
 
     public long getShippingFee() {

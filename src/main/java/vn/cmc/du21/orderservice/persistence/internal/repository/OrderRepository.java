@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    @Query(value = "select * from ordered where orderId = :orderId and userId = :userId"
+    @Query(value = "select * from ordered where statusOrder = 'Chờ thanh toán' and orderId = :orderId and userId = :userId"
             , nativeQuery = true)
     Order findOrderByOrderId(@Param(value = "userId") long userId, @Param(value = "orderId") long orderId);
 

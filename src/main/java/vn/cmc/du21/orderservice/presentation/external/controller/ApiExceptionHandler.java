@@ -17,7 +17,7 @@ public class ApiExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    public StandardResponse handleAllException(Exception ex, WebRequest request) {
+    public StandardResponse<Object> handleAllException(Exception ex, WebRequest request) {
         // quá trình kiểm soat lỗi diễn ra ở đây
         return new StandardResponse<>(
                 StatusResponse.INTERNAL_SERVER_ERROR,
@@ -30,7 +30,7 @@ public class ApiExceptionHandler {
      */
     @ExceptionHandler(IndexOutOfBoundsException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    public StandardResponse toDoException(Exception ex, WebRequest request) {
+    public StandardResponse<Object> toDoException(Exception ex, WebRequest request) {
         return new StandardResponse<>(
                 StatusResponse.BAD_REQUEST,
                 ex.getMessage()
@@ -39,7 +39,7 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(AuthenticationException.class)
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-    public StandardResponse unauthorizedException(Exception ex, WebRequest request) {
+    public StandardResponse<Object> unauthorizedException(Exception ex, WebRequest request) {
         // quá trình kiểm soat lỗi diễn ra ở đây
         return new StandardResponse<>(
                 StatusResponse.UNAUTHORIZED,

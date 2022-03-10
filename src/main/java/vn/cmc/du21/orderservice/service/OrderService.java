@@ -45,11 +45,10 @@ public class OrderService {
         return orderRepository.findOrderByOrderId(userId, orderId).getOrderProducts();
     }
 
-
     @Transactional
     public Order updateOrder(long orderId, long userId) throws Throwable{
          Order foundOrder = orderRepository.findOrderByOrderId(userId, orderId);
-         foundOrder.setStatusOrder("Cancel");
+         foundOrder.setStatusOrder("Hủy");
          orderRepository.save(foundOrder);
          return foundOrder;
     }
@@ -162,9 +161,7 @@ public class OrderService {
         }
         order.setVouchers(vouchers);
 
-        Order newOrder = orderRepository.save(order);
-
-        return newOrder;
+        return orderRepository.save(order);
     }
 
     public DeliveryAddress getDeliveryAddressByOrderId(long deliveryAddressId) {
