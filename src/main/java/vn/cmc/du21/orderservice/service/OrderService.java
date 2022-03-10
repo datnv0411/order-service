@@ -47,10 +47,14 @@ public class OrderService {
 
     @Transactional
     public Order updateOrder(long orderId, long userId) throws Throwable{
+         String statusOrder = "Chờ thanh toán";
          Order foundOrder = orderRepository.findOrderByOrderId(userId, orderId);
-         if(foundOrder == null) throw new RuntimeException("Can't cancel this order");
-         foundOrder.setStatusOrder("Hủy");
-         orderRepository.save(foundOrder);
+         if(foundOrder.getStatusOrder().equals(statusOrder)){
+             foundOrder.setStatusOrder("Hủy");
+             orderRepository.save(foundOrder);
+         } else {
+             throw new RuntimeException("Can't cancel this order");
+         }
          return foundOrder;
     }
 
