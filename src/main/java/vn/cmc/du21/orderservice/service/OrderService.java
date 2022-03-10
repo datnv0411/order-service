@@ -48,6 +48,7 @@ public class OrderService {
     @Transactional
     public Order updateOrder(long orderId, long userId) throws Throwable{
          Order foundOrder = orderRepository.findOrderByOrderId(userId, orderId);
+         if(foundOrder == null) throw new RuntimeException("Can't cancel this order");
          foundOrder.setStatusOrder("Hủy");
          orderRepository.save(foundOrder);
          return foundOrder;
