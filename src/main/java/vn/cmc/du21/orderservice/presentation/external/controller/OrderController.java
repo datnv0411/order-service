@@ -146,6 +146,7 @@ public class OrderController {
         String uri = env.getProperty("path.user-service")+"/api/v1.0/address/" + orderRequest.getAddressId() + "";
 
         HttpEntity<StandardResponse<AddressResponse>> entity = new HttpEntity<>(new StandardResponse<>(), httpHeaders);
+
         ResponseEntity<StandardResponse<AddressResponse>> res = restTemplate
                 .exchange(uri, HttpMethod.GET, entity, new ParameterizedTypeReference<StandardResponse<AddressResponse>>() {});
 

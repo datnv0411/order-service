@@ -152,7 +152,7 @@ public class CartController {
         );
     }
 
-    @GetMapping("/add")
+    @PostMapping("/add")
     ResponseEntity<Object> addProduct (@RequestBody CartProductRequest cartProductRequest
                                         , HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
