@@ -2,7 +2,6 @@ package vn.cmc.du21.orderservice.persistence.internal.entity;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -13,7 +12,7 @@ public class Order {
     private long orderId;
 
     private long userId;
-    private long addressId;
+    private long paymentId;
     private String statusOrder;
     private String note;
     private Timestamp createTime;
@@ -23,28 +22,29 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderProduct> orderProducts;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
-    private List<OrderPayment> orderPayments;
-
     @ManyToMany
     @JoinTable(name = "ordervoucher", joinColumns = @JoinColumn(name = "orderId"), inverseJoinColumns = @JoinColumn(name = "voucherId"))
     private List<Voucher> vouchers;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "deliveryAddressId")
+    private DeliveryAddress deliveryAddress;
+
     public Order() {
     }
 
-    public Order(long orderId, long userId, long addressId, String statusOrder, String note, Timestamp createTime, Timestamp holdTime, Timestamp deliveryTime, List<OrderProduct> orderProducts, List<OrderPayment> orderPayments, List<Voucher> vouchers) {
+    public Order(long orderId, long userId, long paymentId, String statusOrder, String note, Timestamp createTime, Timestamp holdTime, Timestamp deliveryTime, List<OrderProduct> orderProducts, List<Voucher> vouchers, DeliveryAddress deliveryAddress) {
         this.orderId = orderId;
         this.userId = userId;
-        this.addressId = addressId;
+        this.paymentId = paymentId;
         this.statusOrder = statusOrder;
         this.note = note;
         this.createTime = createTime;
         this.holdTime = holdTime;
         this.deliveryTime = deliveryTime;
         this.orderProducts = orderProducts;
-        this.orderPayments = orderPayments;
         this.vouchers = vouchers;
+        this.deliveryAddress = deliveryAddress;
     }
 
     public long getOrderId() {
@@ -63,12 +63,12 @@ public class Order {
         this.userId = userId;
     }
 
-    public long getAddressId() {
-        return addressId;
+    public long getPaymentId() {
+        return paymentId;
     }
 
-    public void setAddressId(long addressId) {
-        this.addressId = addressId;
+    public void setPaymentId(long paymentId) {
+        this.paymentId = paymentId;
     }
 
     public String getStatusOrder() {
@@ -119,19 +119,19 @@ public class Order {
         this.orderProducts = orderProducts;
     }
 
-    public List<OrderPayment> getOrderPayments() {
-        return orderPayments;
-    }
-
-    public void setOrderPayments(List<OrderPayment> orderPayments) {
-        this.orderPayments = orderPayments;
-    }
-
     public List<Voucher> getVouchers() {
         return vouchers;
     }
 
     public void setVouchers(List<Voucher> vouchers) {
         this.vouchers = vouchers;
+    }
+
+    public DeliveryAddress getDeliveryAddress() {
+        return deliveryAddress;
+    }
+
+    public void setDeliveryAddress(DeliveryAddress deliveryAddress) {
+        this.deliveryAddress = deliveryAddress;
     }
 }

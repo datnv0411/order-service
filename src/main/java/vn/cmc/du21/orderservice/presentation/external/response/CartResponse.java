@@ -5,12 +5,12 @@ import java.util.List;
 public class CartResponse {
     private List<VoucherResponse> selectedVouchers;
     private List<CartProductResponse> items;
-    private TotalResponse totals;
+    private TotalCartResponse totals;
 
     public CartResponse() {
     }
 
-    public CartResponse(List<VoucherResponse> selectedVouchers, List<CartProductResponse> items, TotalResponse totals) {
+    public CartResponse(List<VoucherResponse> selectedVouchers, List<CartProductResponse> items, TotalCartResponse totals) {
         this.selectedVouchers = selectedVouchers;
         this.items = items;
         this.totals = totals;
@@ -32,26 +32,38 @@ public class CartResponse {
         this.items = items;
     }
 
-    public TotalResponse getTotals() {
-        TotalResponse totalResponse = new TotalResponse();
+    public TotalCartResponse getTotals() {
+        TotalCartResponse totalResponse = new TotalCartResponse();
+
+        int totalProduct = 0;
 
         long totalPrice = 0;
         for(CartProductResponse item : items)
         {
+            totalProduct += item.getQuantity();
             totalPrice += item.getPriceWithoutSale();
         }
+        // tong tien phai tra (gia san pham chua sale), tong so san pham
         totalResponse.setTotalPrice(totalPrice);
+        totalResponse.setTotalProduct(totalProduct);
 
         long totalSale = 0; // tong tien sale (cua tung san pham)
         long totalSalePrice = 0;
         for(CartProductResponse item : items)
         {
-            totalPrice += item.getTotalPrice();
+            totalSalePrice += item.getTotalPrice();
         }
         totalSale = totalPrice - totalSalePrice;
+        // tong tien cac san pham (gia sale san pham)
+        totalResponse.setTotalPriceWithSale(totalSalePrice);
+        // tong tien sale (gia sale san pham)
         totalResponse.setTotalSale(totalSale);
 
-        long shippingFee = 40; // phi ship
+        long shippingFee = 50000; // phi ship
+        if(totalProduct == 0)
+        {
+            shippingFee = 0;
+        }
         totalResponse.setShippingFee(shippingFee);
 
         long totalDiscount = 0; // tong giam gia (phieu giam gia)
@@ -59,13 +71,16 @@ public class CartResponse {
         {
             for (VoucherResponse item : selectedVouchers)
             {
-                if(totalSalePrice*item.getPercentValue()/100 > item.getUpToValue())
+                if(totalSalePrice > item.getApplicableValue())
                 {
-                    totalDiscount += item.getUpToValue();
-                }
-                else
-                {
-                    totalDiscount += item.getPercentValue()/100;
+                    if(totalSalePrice*item.getPercentValue() > item.getUpToValue()*100)
+                    {
+                        totalDiscount += item.getUpToValue();
+                    }
+                    else
+                    {
+                        totalDiscount += totalSalePrice*item.getPercentValue()/100;
+                    }
                 }
             }
         }
@@ -79,7 +94,7 @@ public class CartResponse {
         return totals;
     }
 
-    public void setTotals(TotalResponse totals) {
+    public void setTotals(TotalCartResponse totals) {
         this.totals = totals;
     }
 }

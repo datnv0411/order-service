@@ -2,6 +2,7 @@ package vn.cmc.du21.orderservice.common;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -10,8 +11,10 @@ import java.util.Locale;
 public class DateTimeUtil {
     private static final String DATE_PATTERN = "dd/MM/yyyy";
     private static final String DATETIME_PATTERN = "dd/MM/yyyy HH:mm:ss";
+    private static final String DATETIME_PATTERN2 = "yyyy-MM-dd HH:mm:ss";
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(DATE_PATTERN, Locale.getDefault());
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATETIME_PATTERN, Locale.getDefault());
+    private static final DateTimeFormatter dateTimeFormatter2 = DateTimeFormatter.ofPattern(DATETIME_PATTERN2, Locale.getDefault());
 
     private DateTimeUtil() {
         super();
@@ -47,11 +50,20 @@ public class DateTimeUtil {
         return Timestamp.valueOf(localDateTime);
     }
 
-    public static LocalDateTime sqlTimestampToLocalDateTime(Timestamp timestamp) {
+    public static LocalDateTime sqlTimestampToLocalDateTime(Timestamp timestamp)
+    {
         return timestamp.toLocalDateTime();
     }
 
     public static String timestampToString(Timestamp expireTime) {
         return String.format(expireTime.toString(), dateTimeFormatter);
+    }
+
+    public static Timestamp stringToTimeStamp(String date) {
+        return Timestamp.valueOf(String.format(date, dateTimeFormatter2));
+    }
+
+    public static Timestamp getTimeNow(){
+        return Timestamp.from(Instant.now());
     }
 }

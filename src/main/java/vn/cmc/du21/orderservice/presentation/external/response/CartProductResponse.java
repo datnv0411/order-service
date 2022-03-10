@@ -8,8 +8,6 @@ public class CartProductResponse {
     private long sizeId;
     private int quantity;
 
-    private long totalPrice;
-
     public long getPriceWithoutSale()
     {
         for (SizeResponse item : productResponse.getSizeResponseList())
@@ -17,6 +15,18 @@ public class CartProductResponse {
             if(item.getSizeId() == sizeId)
             {
                 return item.getPrice() * quantity;
+            }
+        }
+
+        throw new RuntimeException("Size is not available -- get total price in CartProductResponse !!!");
+    }
+
+    public long getTotalPrice() {
+        for (SizeResponse item : productResponse.getSizeResponseList())
+        {
+            if(item.getSizeId() == sizeId)
+            {
+                return item.getPriceSale() * quantity;
             }
         }
 
@@ -33,36 +43,12 @@ public class CartProductResponse {
         this.quantity = quantity;
     }
 
-    public CartProductResponse(ProductResponse productResponse, long sizeId, int quantity, long totalPrice) {
-        this.productResponse = productResponse;
-        this.sizeId = sizeId;
-        this.quantity = quantity;
-        this.totalPrice = totalPrice;
-    }
-
     public ProductResponse getProductResponse() {
         return productResponse;
     }
 
     public void setProductResponse(ProductResponse productResponse) {
         this.productResponse = productResponse;
-    }
-
-    public long getTotalPrice() {
-        for (SizeResponse item : productResponse.getSizeResponseList())
-        {
-            if(item.getSizeId() == sizeId)
-            {
-                return item.getPriceSale() * quantity;
-            }
-        }
-
-        throw new RuntimeException("Size is not available -- get total price in CartProductResponse !!!");
-    }
-
-    public void setTotalPrice(long totalPrice) {
-        this.totalPrice = totalPrice;
-
     }
 
     public long getSizeId() {

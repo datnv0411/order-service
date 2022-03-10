@@ -26,14 +26,17 @@ public class Voucher {
     @ManyToMany(mappedBy = "vouchers")
     private List<Order> orders;
 
+    @OneToMany(mappedBy = "voucher", cascade = CascadeType.ALL)
+    private List<VoucherUser> voucherUsers;
+
     public Voucher() {
     }
 
-    public Voucher(long voucherId, String codeVoucher, Timestamp startTime, Timestamp emdTime, int timesOfUse, int quantity, String image, String title, int percentValue, int upToValue, int applicableValue, List<Order> orders) {
+    public Voucher(long voucherId, String codeVoucher, Timestamp startTime, Timestamp endTime, int timesOfUse, int quantity, String image, String title, int percentValue, int upToValue, int applicableValue, List<Order> orders, List<VoucherUser> voucherUsers) {
         this.voucherId = voucherId;
         this.codeVoucher = codeVoucher;
         this.startTime = startTime;
-        this.endTime = emdTime;
+        this.endTime = endTime;
         this.timesOfUse = timesOfUse;
         this.quantity = quantity;
         this.image = image;
@@ -42,6 +45,7 @@ public class Voucher {
         this.upToValue = upToValue;
         this.applicableValue = applicableValue;
         this.orders = orders;
+        this.voucherUsers = voucherUsers;
     }
 
     public long getVoucherId() {
@@ -138,5 +142,13 @@ public class Voucher {
 
     public void setOrders(List<Order> orders) {
         this.orders = orders;
+    }
+
+    public List<VoucherUser> getVoucherUsers() {
+        return voucherUsers;
+    }
+
+    public void setVoucherUsers(List<VoucherUser> voucherUsers) {
+        this.voucherUsers = voucherUsers;
     }
 }

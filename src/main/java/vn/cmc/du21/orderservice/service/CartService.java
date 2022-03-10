@@ -9,7 +9,9 @@ import vn.cmc.du21.orderservice.persistence.internal.repository.CartProductRepos
 import vn.cmc.du21.orderservice.persistence.internal.repository.CartRepository;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CartService {
@@ -19,17 +21,64 @@ public class CartService {
     CartProductRepository cartProductRepository;
 
     @Transactional
-    public void createCart(long userId){
+    public Cart createCart(long userId){
+
         Cart newCart = new Cart();
         newCart.setUserId(userId);
-        newCart.setCartId(0);
-        cartRepository.save(newCart);
+        List<CartProduct> cartProducts = new ArrayList<>();
+        newCart.setCartProducts(cartProducts);
+
+        return cartRepository.save(newCart);
+    }
+
+    @Transactional
+    public Cart getMyCart(long userId) {
+        Optional<Cart> foundCart = cartRepository.findByUserId(userId);
+        if(foundCart.isPresent())
+        {
+            return foundCart.get();
+        }
+        else
+        {
+            return createCart(userId);
+        }
+    }
+
+    @Transactional
+    public void updateProductOnCart(List<CartProduct> cartProductList, long userId) {
+        Optional<Cart> foundCart = cartRepository.findByUserId(userId);
+
+        if(foundCart.isPresent())
+        {
+            for (CartProduct item : cartProductList)
+            {
+                CartProductId itemCartProductId = item.getCartProductId();
+                itemCartProductId.setCartId(foundCart.get().getCartId());
+
+                item.setCartProductId(itemCartProductId);
+                item.setCart(foundCart.get());
+            }
+
+            foundCart.get().setCartProducts(cartProductList);
+
+            cartRepository.save(foundCart.get());
+        }
     }
 
     @Transactional
     public Cart findCart (long userId){
-        return cartRepository.findByUserId(userId).orElse(null);
+
+       Cart foundCart = cartRepository.findByUserId(userId).orElse(null);
+       if(foundCart == null)
+       {
+           return createCart(userId);
+       }
+       else
+       {
+           return foundCart;
+       }
     }
+
     @Transactional
     public void addProduct (CartProduct cartProduct){
         if(cartProductRepository.findCartProductByCartProductId(cartProduct.getCartProductId()) == null){
@@ -42,21 +91,34 @@ public class CartService {
 
     }
     @Transactional
-    public void removeProduct(CartProductId cartProductId) throws Throwable {
-        CartProduct checkfound = cartProductRepository.findByCartProductId(cartProductId).orElseThrow(
+    public void removeProduct(long cartId, long productId, long sizeId) throws Throwable {
+        CartProductId cartProductId = new CartProductId(cartId, productId, sizeId);
+        CartProduct foundCartProduct = cartProductRepository.findByCartProductId(cartProductId).orElseThrow(
                 () -> {
                     throw new RuntimeException("product does not exist !!!");
                 }
         );
-        cartProductRepository.delete(checkfound);
+        cartProductRepository.delete(foundCartProduct);
     }
+
     @Transactional
     public void removeAll(long cartId){
         cartProductRepository.deleteAllByCartProductId_CartId(cartId);
     }
+
     @Transactional
     public List<CartProduct> findAllByCartId (long cartId){
-        List<CartProduct> list = cartProductRepository.findAllByCartProductId_CartId(cartId);
-        return  list;
+        return cartProductRepository.findAllByCartProductId_CartId(cartId);
+    }
+
+    @Transactional
+    public void minusQuantity(long cartId, long productId, long sizeId) throws Throwable {
+        CartProductId cartProductId = new CartProductId(cartId, productId, sizeId);
+        CartProduct foundCartProduct = cartProductRepository.findByCartProductId(cartProductId).orElseThrow(
+                () -> {
+                    throw new RuntimeException("product does not exist !!!");
+                }
+        );
+        foundCartProduct.setQuantity(foundCartProduct.getQuantity()-1);
     }
 }

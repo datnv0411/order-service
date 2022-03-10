@@ -9,6 +9,7 @@ public class CartProductRequest {
     public CartProductRequest() {
     }
 
+
     public CartProductRequest(long cartId, long productId, long sizeId, int quantity) {
         this.cartId = cartId;
         this.productId = productId;
