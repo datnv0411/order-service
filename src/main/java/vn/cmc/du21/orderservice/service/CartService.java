@@ -119,6 +119,13 @@ public class CartService {
                     throw new RuntimeException("product does not exist !!!");
                 }
         );
-        foundCartProduct.setQuantity(foundCartProduct.getQuantity()-1);
+        if(foundCartProduct.getQuantity() > 1){
+            foundCartProduct.setQuantity(foundCartProduct.getQuantity()-1);
+            cartProductRepository.save(foundCartProduct);
+        }
+        else {
+            removeProduct(cartId,productId,sizeId);
+        }
+
     }
 }
