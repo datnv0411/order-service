@@ -152,7 +152,7 @@ public class CartController {
                 )
         );
     }
-
+    // add product to cart
     @PostMapping("/add")
     ResponseEntity<Object> addProduct (@RequestBody CartProductRequest cartProductRequest
                                         , HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -227,6 +227,7 @@ public class CartController {
         );
     }
 
+    // delete product from cart
     @DeleteMapping("/remove")
     ResponseEntity<Object> removeProduct(@RequestParam(name = "productId", required = true) long productId
                                         , @RequestParam(name = "sizeId", required = true) long sizeId
@@ -270,6 +271,7 @@ public class CartController {
         );
     }
 
+    //delete all product
     @DeleteMapping("/quick-remove")
     ResponseEntity<Object> quickRemove(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
@@ -288,6 +290,7 @@ public class CartController {
         );
     }
 
+    //delete 1 product
     @DeleteMapping("/minus-quantity")
     ResponseEntity<Object> minusProduct(@RequestBody CartProductRequest cartProductRequest
             , HttpServletRequest request, HttpServletResponse response) throws Throwable{

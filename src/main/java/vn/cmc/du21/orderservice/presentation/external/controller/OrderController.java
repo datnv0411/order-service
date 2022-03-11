@@ -39,7 +39,7 @@ public class OrderController {
     @Autowired
     OrderService orderService;
 
-    private static final String GET_INFO_PAYMENT = "/api/v1.0/get-info-payment";
+    private static final String GET_INFO_PAYMENT = "/api/v1.0/payment/get-info-payment";
     private static final String PATH_PAYMENT_SERVICE = "path.payment-service";
 
     //get detail order
@@ -65,7 +65,16 @@ public class OrderController {
         orderProductResponses = getDetailProduct(orderProductResponses);
 
         // get order payment
-        PaymentResponse orderPaymentResponse = new PaymentResponse(orderService.getOrderByOrderId(userId, orderId).getPaymentId());
+        final String uri = env.getProperty(PATH_PAYMENT_SERVICE) + GET_INFO_PAYMENT
+                + "?orderId=" + orderId + "&paymentId=" + orderService.getOrderByOrderId(userId, orderId).getPaymentId();
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpEntity<StandardResponse<PaymentResponse>> requestPayment = new HttpEntity<>(new StandardResponse<>());
+        ResponseEntity<StandardResponse<PaymentResponse>> responsePayment = restTemplate
+                .exchange(uri, HttpMethod.GET, requestPayment, new ParameterizedTypeReference<StandardResponse<PaymentResponse>>() {
+                });
+
+        PaymentResponse orderPaymentResponse =responsePayment.getBody().getData();
 
         // get total order
         TotalOrderResponse totalResponse = getTotalOrder(userId, orderId);
@@ -143,7 +152,7 @@ public class OrderController {
 
         // get payment response
         final String uri = env.getProperty(PATH_PAYMENT_SERVICE) + GET_INFO_PAYMENT
-                + "?orderId=" + orderId + "?paymentId=" + paymentId;
+                + "?orderId=" + orderId + "&paymentId=" + paymentId;
 
         RestTemplate restTemplate = new RestTemplate();
         HttpEntity<StandardResponse<PaymentResponse>> requestPayment = new HttpEntity<>(new StandardResponse<>());
@@ -172,7 +181,7 @@ public class OrderController {
         TotalOrderResponse totalResponse = getTotalOrder(userId, orderId);
 
         OrderResponse orderResponse = OrderMapper.convertToOrderResponse(
-                orderService.updateOrderAfterPaid(orderId, userId, paymentResponse.ge), orderProductResponses
+                orderService.updateOrderAfterPaid(orderId, userId, paymentResponse.getStatus()), orderProductResponses
                 , orderPaymentResponse, addressResponse
                 , totalResponse
         );
@@ -191,7 +200,7 @@ public class OrderController {
     ResponseEntity<Object>createOrder(@RequestBody OrderRequest orderRequest,
                                       HttpServletRequest request, HttpServletResponse response) throws Throwable{
 
-        log.info("Mapped createOrder method {{POST: /order/{orderId}}}");
+        log.info("Mapped createOrder method {{POST: /order/create");
 
         UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();

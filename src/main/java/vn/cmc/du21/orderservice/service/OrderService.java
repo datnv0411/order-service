@@ -59,10 +59,9 @@ public class OrderService {
     }
 
     @Transactional
-    public Order updateOrderAfterPaid(long orderId, long userId) throws Throwable{
-        String statusOrder = "D thanh toán";
+    public Order updateOrderAfterPaid(long orderId, long userId, String statusPaid) throws Throwable{
         Order foundOrder = orderRepository.findOrderByOrderId(userId, orderId);
-        if(foundOrder.getStatusOrder().equals(statusOrder)){
+        if(statusPaid.equals("Thành công")){
             foundOrder.setStatusOrder("Đã thanh toán");
             orderRepository.save(foundOrder);
         } else {
