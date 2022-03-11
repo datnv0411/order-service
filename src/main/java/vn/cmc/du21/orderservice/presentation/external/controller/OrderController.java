@@ -239,10 +239,55 @@ public class OrderController {
         }
 
         //create order + delivery address
-        orderService.createOrder(
+        long orderId = orderService.createOrder(
                 OrderMapper.convertOrderRequestToOrder(orderRequest),
                 DeliveryAddressMapper.convertAddressResponseToDeliveryAddress(addressResponse)
-        );
+        ).getOrderId();
+
+        // get name payment
+        uri = env.getProperty(PATH_PAYMENT_SERVICE) + GET_INFO_PAYMENT
+                + "?orderId=" + orderId + "&paymentId=" + orderRequest.getPaymentId();
+
+        restTemplate = new RestTemplate();
+        HttpEntity<StandardResponse<PaymentResponse>> requestPayment = new HttpEntity<>(new StandardResponse<>());
+        ResponseEntity<StandardResponse<PaymentResponse>> responsePayment = restTemplate
+                .exchange(uri, HttpMethod.GET, requestPayment, new ParameterizedTypeReference<StandardResponse<PaymentResponse>>() {
+                });
+
+        PaymentResponse paymentResponse = responsePayment.getBody().getData();
+        String paymentName = paymentResponse.getPaymentName();
+        uri = env.getProperty(PATH_PAYMENT_SERVICE) + "/api/v1.0/payment/" + paymentName.toLowerCase() + "/" + orderId;
+
+        if(paymentName.equals("Vnpay"))
+        {
+            restTemplate = new RestTemplate();
+            HttpEntity<StandardResponse<String>> requestLink = new HttpEntity<>(new StandardResponse<>(), httpHeaders);
+            ResponseEntity<StandardResponse<String>> responseLink = restTemplate
+                .exchange(uri, HttpMethod.GET, requestLink, new ParameterizedTypeReference<StandardResponse<String>>() {});
+            String linkPay = responseLink.getBody().getData();
+            response.sendRedirect(linkPay);
+
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new StandardResponse<>(
+                            StatusResponse.SUCCESSFUL,
+                            "Success!!"
+                    )
+            );
+        }
+        else if(paymentName.equals("Momo") || paymentName.equals("Zalopay"))
+        {
+            restTemplate = new RestTemplate();
+            HttpEntity<byte[]> requestQR = new HttpEntity<>(httpHeaders);
+            ResponseEntity<byte[]> responseQR = restTemplate
+                    .exchange(uri, HttpMethod.GET, requestQR, new ParameterizedTypeReference<byte[]>() {
+                    });
+
+            byte[] bytes = responseQR.getBody();
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(bytes);
+        }
 
         return ResponseEntity.status(HttpStatus.OK).body(
                 new StandardResponse<>(

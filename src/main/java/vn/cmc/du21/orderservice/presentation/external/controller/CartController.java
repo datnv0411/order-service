@@ -189,7 +189,7 @@ public class CartController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     new StandardResponse<>(
                             StatusResponse.NOT_FOUND,
-                            "Product not found",""
+                            "Product not found"
                     )
             );
         }
@@ -399,6 +399,7 @@ public class CartController {
                     )
             );
         }
+
         List<CartProductResponse> cartProductResponseList = cartService.getMyCart(userId).getCartProducts()
                 .stream()
                 .map(CartProductMapper::convertCartProductToCartProductResponse)
