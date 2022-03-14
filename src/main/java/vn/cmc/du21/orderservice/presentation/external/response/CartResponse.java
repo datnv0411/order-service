@@ -48,23 +48,25 @@ public class CartResponse {
         totalResponse.setTotalProduct(totalProduct);
 
         long totalSale = 0; // tong tien sale (cua tung san pham)
-        long totalSalePrice = 0;
+        long totalSalePrice = 0; //tong tien cac san pham voi gia sale
         for(CartProductResponse item : items)
         {
             totalSalePrice += item.getTotalPrice();
         }
         totalSale = totalPrice - totalSalePrice;
-        // tong tien cac san pham (gia sale san pham)
-        totalResponse.setTotalPriceWithSale(totalSalePrice);
         // tong tien sale (gia sale san pham)
         totalResponse.setTotalSale(totalSale);
 
-        long shippingFee = 50000; // phi ship
+        long fee = 1000000; // phi phuc vu
         if(totalProduct == 0)
         {
-            shippingFee = 0;
+            fee = 0;
         }
-        totalResponse.setShippingFee(shippingFee);
+        totalResponse.setFee(fee);
+
+        totalResponse.setTotalBeforVat(totalSalePrice + totalResponse.getFee());
+        totalResponse.setVat(totalResponse.getTotalBeforVat()/10);
+        totalResponse.setTotalAfterVat(totalResponse.getTotalBeforVat() + totalResponse.getVat());
 
         long totalDiscount = 0; // tong giam gia (phieu giam gia)
         if(selectedVouchers != null)
@@ -88,7 +90,7 @@ public class CartResponse {
 
         totalResponse.setTotalDiscount(totalDiscount);
 
-        long totalPaySum = totalSalePrice + shippingFee - totalDiscount; // tong tien phai tra
+        long totalPaySum = totalResponse.getTotalAfterVat() - totalDiscount; // tong tien phai tra
         totalResponse.setTotalPaySum(totalPaySum);
         totals = totalResponse;
         return totals;
