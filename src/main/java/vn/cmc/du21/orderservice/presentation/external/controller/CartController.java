@@ -11,8 +11,6 @@ import org.springframework.web.client.RestTemplate;
 import vn.cmc.du21.orderservice.common.JwtTokenProvider;
 import vn.cmc.du21.orderservice.common.restful.StandardResponse;
 import vn.cmc.du21.orderservice.common.restful.StatusResponse;
-import vn.cmc.du21.orderservice.persistence.internal.entity.CartProduct;
-import vn.cmc.du21.orderservice.persistence.internal.entity.CartProductId;
 import vn.cmc.du21.orderservice.presentation.external.mapper.CartProductMapper;
 import vn.cmc.du21.orderservice.presentation.external.mapper.VoucherMapper;
 import vn.cmc.du21.orderservice.presentation.external.request.CartProductRequest;
@@ -386,10 +384,15 @@ public class CartController {
             StandardResponse<MenuResponse> menuResponse = responseMenu.getBody();
             Set<ProductResponse> setProduct = menuResponse.getData().getProducts();
             for(ProductResponse item : setProduct){
-                CartProductId cartProductId = new CartProductId(cartService.getMyCart(userId)
-                        .getCartId(),item.getProductId(),menuRequest.getSizeId());
-                CartProduct cartProduct = new CartProduct(cartProductId,1,cartService.findCart(userId));
-                cartService.addProduct(cartProduct);
+                CartProductRequest cartProductRequest = new CartProductRequest();
+                cartProductRequest.setCartId(cartService.findCart(userId).getCartId());
+                cartProductRequest.setProductId(item.getProductId());
+                cartProductRequest.setSizeId(menuRequest.getSizeId());
+                cartProductRequest.setQuantity(1);
+
+                cartService.addProduct(
+                        CartProductMapper.convertCartProductRequestToCartProduct(cartProductRequest, cartService.findCart(userId))
+                );
             }
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
