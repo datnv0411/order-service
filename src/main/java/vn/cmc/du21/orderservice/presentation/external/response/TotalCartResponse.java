@@ -6,7 +6,7 @@ public class TotalCartResponse {
     private long fee; // phi phuc vu
     private long totalSale; // tong giam tien sale (cua tung san pham)
     //private long totalPriceWithSale; // tong tien san pham (gia sale)
-    private long totalBeforVat; // tien truoc VAT
+    private long totalBeforeVat; // tien truoc VAT
     private long vat; // VAT
     private long totalAfterVat; // tien sau VAT
     //private long shippingFee; // phi ship
@@ -21,7 +21,7 @@ public class TotalCartResponse {
         this.totalPrice = totalPrice;
         this.fee = fee;
         this.totalSale = totalSale;
-        this.totalBeforVat = totalBeforVat;
+        this.totalBeforeVat = totalBeforVat;
         this.vat = vat;
         this.totalAfterVat = totalAfterVat;
         this.totalDiscount = totalDiscount;
@@ -60,12 +60,12 @@ public class TotalCartResponse {
         this.totalSale = totalSale;
     }
 
-    public long getTotalBeforVat() {
-        return totalBeforVat;
+    public long getTotalBeforeVat() {
+        return totalBeforeVat;
     }
 
-    public void setTotalBeforVat(long totalBeforVat) {
-        this.totalBeforVat = totalBeforVat;
+    public void setTotalBeforeVat(long totalBeforeVat) {
+        this.totalBeforeVat = totalBeforeVat;
     }
 
     public long getVat() {

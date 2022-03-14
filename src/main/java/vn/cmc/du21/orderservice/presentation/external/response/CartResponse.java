@@ -64,9 +64,9 @@ public class CartResponse {
         }
         totalResponse.setFee(fee);
 
-        totalResponse.setTotalBeforVat(totalSalePrice + totalResponse.getFee());
-        totalResponse.setVat(totalResponse.getTotalBeforVat()/10);
-        totalResponse.setTotalAfterVat(totalResponse.getTotalBeforVat() + totalResponse.getVat());
+        totalResponse.setTotalBeforeVat(totalSalePrice + totalResponse.getFee());
+        totalResponse.setVat(totalResponse.getTotalBeforeVat()/10);
+        totalResponse.setTotalAfterVat(totalResponse.getTotalBeforeVat() + totalResponse.getVat());
 
         long totalDiscount = 0; // tong giam gia (phieu giam gia)
         if(selectedVouchers != null)
