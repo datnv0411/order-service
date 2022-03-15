@@ -277,7 +277,7 @@ public class CartController {
     @DeleteMapping("/quick-remove")
     ResponseEntity<Object> quickRemove(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
-        log.info("Mapped removeProduct method {{DELETE: /quick-remove}}");
+        log.info("Mapped quick-remove method {{DELETE: /quick-remove}}");
         UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
 
@@ -297,7 +297,7 @@ public class CartController {
     ResponseEntity<Object> minusProduct(@RequestBody CartProductRequest cartProductRequest
             , HttpServletRequest request, HttpServletResponse response) throws Throwable{
 
-        log.info("Mapped removeProduct method {{DELETE: /minus-quantity}}");
+        log.info("Mapped minusProduct method {{DELETE: /minus-quantity}}");
         UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
         try{
@@ -364,7 +364,7 @@ public class CartController {
     ResponseEntity<Object> addMenu (@RequestBody MenuRequest menuRequest, HttpServletResponse response
                                     , HttpServletRequest request) throws Throwable {
 
-        log.info("Mapped removeProduct method {{POST: /add-menu}}");
+        log.info("Mapped addMenu method {{POST: /add-menu}}");
         UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
         long userId = userLogin.getUserId();
         try{
@@ -392,6 +392,76 @@ public class CartController {
 
                 cartService.addProduct(
                         CartProductMapper.convertCartProductRequestToCartProduct(cartProductRequest, cartService.findCart(userId))
+                );
+            }
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new StandardResponse<>(
+                            StatusResponse.NOT_FOUND,
+                            "Menu not found",""
+                    )
+            );
+        }
+
+        List<CartProductResponse> cartProductResponseList = cartService.getMyCart(userId).getCartProducts()
+                .stream()
+                .map(CartProductMapper::convertCartProductToCartProductResponse)
+                .collect(Collectors.toList());
+
+        for (CartProductResponse item : cartProductResponseList){
+            final String uri = env.getProperty(PATH_INVENTORY_SERVICE) + GET_DETAIL_PRODUCT +
+                    item.getProductResponse().getProductId();
+
+            RestTemplate restTemplate = new RestTemplate();
+            HttpEntity<StandardResponse<ProductResponse>> requestProduct = new HttpEntity<>(new StandardResponse<>());
+            ResponseEntity<StandardResponse<ProductResponse>> responseProduct = restTemplate
+                    .exchange(uri, HttpMethod.GET, requestProduct, new ParameterizedTypeReference<StandardResponse<ProductResponse>>() {
+                    });
+
+            ProductResponse productResponse = responseProduct.getBody().getData();
+
+            item.setProductResponse(productResponse);
+        }
+
+        CartResponse cartResponse = new CartResponse();
+        cartResponse.setItems(cartProductResponseList);
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new StandardResponse<>(
+                        StatusResponse.SUCCESSFUL,
+                        "Added",
+                        cartResponse
+                )
+        );
+    }
+
+    @DeleteMapping("/minus-menu")
+    ResponseEntity<Object> minusMenu (@RequestBody MenuRequest menuRequest, HttpServletResponse response
+            , HttpServletRequest request) throws Throwable {
+
+        log.info("Mapped removeProduct method {{POST: /delete-menu}}");
+        UserResponse userLogin = JwtTokenProvider.getInfoUserFromToken(request, env);
+        long userId = userLogin.getUserId();
+        try{
+            final String uri = env.getProperty(PATH_INVENTORY_SERVICE) + GET_DETAIL_MENU + menuRequest.getMenuId();
+
+            HttpHeaders httpHeaders = new HttpHeaders();
+            RestTemplate restTemplate = new RestTemplate();
+            httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+            httpHeaders.setBearerAuth(request.getHeader("Authorization").split(" ")[1]);
+
+            HttpEntity<StandardResponse<MenuResponse>> requestMenu = new HttpEntity<>(new StandardResponse<>(), httpHeaders);
+
+            ResponseEntity<StandardResponse<MenuResponse>> responseMenu = restTemplate
+                    .exchange(uri, HttpMethod.GET, requestMenu, new ParameterizedTypeReference<StandardResponse<MenuResponse>>() {
+                    });
+
+            StandardResponse<MenuResponse> menuResponse = responseMenu.getBody();
+            Set<ProductResponse> setProduct = menuResponse.getData().getProducts();
+            for(ProductResponse item : setProduct){
+
+                cartService.minusQuantity(
+                        cartService.findCart(userId).getCartId(), item.getProductId(), menuRequest.getSizeId()
                 );
             }
         }catch (Exception e){
