@@ -125,7 +125,7 @@ public class OrderController {
         TotalOrderResponse totalResponse = getTotalOrder(userId, orderId);
 
         OrderResponse orderResponse = OrderMapper.convertToOrderResponse(
-                orderService.updateOrder(orderId, userId), orderProductResponses
+                orderService.updateStatusOrder(orderId, userId, "Đã hủy"), orderProductResponses
                 , orderPaymentResponse, addressResponse
                 , totalResponse
         );
@@ -221,7 +221,6 @@ public class OrderController {
         AddressResponse addressResponse = res.getBody().getData();
 
         // get price + price sale product
-
         for (OrderProductRequest item : orderRequest.getOrderProductRequests()) {
              uri = env.getProperty("path.inventory-service") + "/api/v1.0/product/get-detail-product/" +
                     item.getProductId();
@@ -288,6 +287,8 @@ public class OrderController {
                     .contentType(MediaType.IMAGE_JPEG)
                     .body(bytes);
         }
+
+        orderService.updateStatusOrder(orderId, userId, "Đặt món");
 
         return ResponseEntity.status(HttpStatus.OK).body(
                 new StandardResponse<>(

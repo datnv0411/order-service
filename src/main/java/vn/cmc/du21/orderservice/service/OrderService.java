@@ -46,14 +46,16 @@ public class OrderService {
     }
 
     @Transactional
-    public Order updateOrder(long orderId, long userId) throws Throwable{
-         String statusOrder = "Chờ thanh toán";
+    public Order updateStatusOrder(long orderId, long userId, String status) throws Throwable{
          Order foundOrder = orderRepository.findOrderByOrderId(userId, orderId);
-         if(foundOrder.getStatusOrder().equals(statusOrder)){
-             foundOrder.setStatusOrder("Hủy");
+         if(foundOrder != null
+             && (foundOrder.getStatusOrder().equals("Chờ thanh toán") ||  foundOrder.getStatusOrder().equals("Đặt món"))
+             && !foundOrder.getStatusOrder().equals(status)){
+
+             foundOrder.setStatusOrder(status);
              orderRepository.save(foundOrder);
          } else {
-             throw new RuntimeException("Can't cancel this order");
+             throw new RuntimeException("Can't update status of order");
          }
          return foundOrder;
     }
@@ -62,7 +64,7 @@ public class OrderService {
     public Order updateOrderAfterPaid(long orderId, long userId, String statusPaid) throws Throwable{
         Order foundOrder = orderRepository.findOrderByOrderId(userId, orderId);
         if(statusPaid != null && statusPaid.equals("Thành công")){
-            foundOrder.setStatusOrder("Đã thanh toán");
+            foundOrder.setStatusOrder("Thành công");
             orderRepository.save(foundOrder);
         }
         return foundOrder;
